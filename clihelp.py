@@ -9,7 +9,13 @@
 # python clihelp.py -h
 # python clihelp.py --help
 #
+# ./clihelp.py hello
+# ./clihelp.py -h
+# ./clihelp.py --help
+#
 # more help text
+
+
 
 ## Help -- print file header until '##', ignoring first row, removing leading '#'
 import os, sys, re

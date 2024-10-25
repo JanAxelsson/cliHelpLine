@@ -5,9 +5,13 @@
 // 
 // Example help text
 //
-// node clihelp.js hello
+// node clihelp.js
 // node clihelp.js -h
 // node clihelp.js --help
+//
+// ./clihelp.js
+// ./clihelp.js -h
+// ./clihelp.js --help
 //
 // help text
 
