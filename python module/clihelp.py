@@ -5,13 +5,13 @@
 #
 # Example help text
 #
-# python clihelp_using_module.py hello
-# python clihelp_using_module.py -h
-# python clihelp_using_module.py --help
+# python clihelp.py hello
+# python clihelp.py -h
+# python clihelp.py --help
 #
-# ./clihelp_using_module.py hello
-# ./clihelp_using_module.py -h
-# ./clihelp_using_module.py --help
+# ./clihelp.py hello
+# ./clihelp.py -h
+# ./clihelp.py --help
 #
 # more help text
 
