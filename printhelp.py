@@ -12,21 +12,21 @@
 # more help text
 
 ## Help -- print file header until '##', ignoring first row, removing leading '#'
-import os, sys
+import os, sys, re
 if len(sys.argv) > 1 and (sys.argv[1] == '-h' or sys.argv[1] == '--help'):
-    f = open(os.path.realpath(__file__), 'r') .read() .split('##')[0] .split('\n#')[1:]; print( "\n".join( [ i[1:] for i in f ] ) );quit()
+    f=open(os.path.realpath(__file__),'r').read().split('##')[0];f=re.sub(r'^\s*[\r\n]+','',f,flags=re.MULTILINE);f=f.split('\n#')[1:];f="\n".join([i[1:] for i in f]);print(f);quit()
 # End Help
 
 
 # Explanation
-# import os, sys                                    # Import from Python Standard Library
+# import os, sys, re                                                            # Import from Python Standard Library
 # if len(sys.argv) > 1 and (sys.argv[1] == '-h' or sys.argv[1] == '--help'):    # Run statement only if non-empty first argument is -h or --help
-#    result1= open( os.path.realpath(__file__), 'r').read()  # Read current script file
-#    result2 = result1.split('##')[0]               # Keep part before '##'
-#    f = result2.split('\n#')[1:]                   # Split at character '#' at beginning of line (gives list), and keep all but first line
-#    result3 = "\n".join( [ i[1:] for i in f ])     # Skipping first character for each line, and join with end-of-lines
-#    print( result3 )                               # Print 
-#    quit()                                         # Exit script after printing help
+#    f = open(os.path.realpath(__file__), 'r') .read() .split('##')[0]          # Read current script file until ##
+#    f = re.sub(r'^\s*[\r\n]+', '', f, flags=re.MULTILINE);                     # Remove blank lines
+#    f = f.split('\n#')[1:];                                                    # Split at '\n#', and remove first line
+#    f = "\n".join( [ i[1:] for i in f ] );                                     # Skipping first character for each line, and join with end-of-lines
+#    print( f )                                                                 # Print 
+#    quit()                                                                     # Exit script after printing help
 
 
 # Example code
