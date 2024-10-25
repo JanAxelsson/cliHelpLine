@@ -5,9 +5,9 @@
 // 
 // Example help text
 //
-// node printhelp.js hello
-// node printhelp.js -h
-// node printhelp.js --help
+// node clihelp.js hello
+// node clihelp.js -h
+// node clihelp.js --help
 //
 // help text
 

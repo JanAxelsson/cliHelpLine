@@ -5,9 +5,9 @@
 #
 # Example help text
 #
-# python printhelp.py hello
-# python printhelp.py -h
-# python printhelp.py --help
+# python clihelp.py hello
+# python clihelp.py -h
+# python clihelp.py --help
 #
 # more help text
 

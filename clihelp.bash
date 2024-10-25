@@ -5,9 +5,9 @@
 # 
 # Example help text
 #
-# ./printhelp.bash -h      # Help on script
-# ./printhelp.bash --help  # Help on script
-# ./printhelp.bash         # Run script
+# ./clihelp.bash -h      # Help on script
+# ./clihelp.bash --help  # Help on script
+# ./clihelp.bash         # Run script
 #
 # help text
 
