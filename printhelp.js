@@ -28,4 +28,3 @@ if ( (process.argv[2] === "--help") || ( process.argv[2] ===  "-h" ) ){
 
 // Example code
 console.log("Hello world!");
-console.log("First argument was : " + process.argv[2]);

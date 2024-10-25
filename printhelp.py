@@ -31,5 +31,3 @@ if len(sys.argv) > 1 and (sys.argv[1] == '-h' or sys.argv[1] == '--help'):
 
 # Example code
 print('Hello World!')
-if len(sys.argv) > 1 :
-    print('First argument was : ', sys.argv[1])

@@ -10,7 +10,6 @@
 # ./printhelp.bash         # Run script
 #
 # help text
-# help text
 
 
 
@@ -34,4 +33,3 @@ if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then sed '1d; /^##/q; /^\s*$/d; s/^
 
 # Runnable code
 echo "Hello world!"
-echo "First argument was : $1"
