@@ -5,9 +5,9 @@
 # 
 # Example help text
 #
-# ./clihelp.bash -h      # Help on script
-# ./clihelp.bash --help  # Help on script
-# ./clihelp.bash         # Run script
+# ./cliHelpLine.bash -h      # Help on script
+# ./cliHelpLine.bash --help  # Help on script
+# ./cliHelpLine.bash         # Run script
 #
 # help text
 

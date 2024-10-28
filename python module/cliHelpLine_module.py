@@ -2,10 +2,10 @@ import os
 import re
 
 
-def clihelp(file, sysargs):
+def cliHelpLine(file, sysargs):
     # Use in python command line script :
-    #   import sys, clihelp_module
-    #   clihelp( __file__, sys.argv)
+    #   import sys, cliHelpLine_module
+    #   cliHelpLine( __file__, sys.argv)
 
     if len(sysargs) > 1 and (sysargs[1] == '-h' or sysargs[1] == '--help'):
         f = open(os.path.realpath(file), 'r').read().split('##')[0]  # Read file until ##
