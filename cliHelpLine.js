@@ -3,33 +3,33 @@
 // Example script
 // ==============
 // 
-// Example help text
+// This is my help text ...
+//
+// Example use :
 //
 // node cliHelpLine.js
-// node cliHelpLine.js -h
 // node cliHelpLine.js --help
+// node cliHelpLine.js -h
+// node cliHelpLine.js /?
 //
 // ./cliHelpLine.js
-// ./cliHelpLine.js -h
 // ./cliHelpLine.js --help
+// ./cliHelpLine.js -h
+// ./cliHelpLine.js /?
 //
-// help text
+// ... more help text ...
 
-//// Help -- print file header until '////', ignore first row, remove leading '//'
-if ( (process.argv[2] === "--help") || ( process.argv[2] ===  "-h" ) ){
-    console.log( require("fs").readFileSync(__filename).toString().replace(/^.*\n/, '').split(`////`)[0].replace(/^\s*[\r\n]/gm, '').replace(/^\/\//gm,'').replace(/^ /gm,'') ); process.exit();
-}// End Help
+//// Help -- print file header until '////'    (see https://github.com/JanAxelsson/cliHelpLine)
+if (process.argv.slice(2).some(a => ['--help', '-h', '/?'].includes(a))) { require('fs').readFileSync(__filename, 'utf8').split('\n').filter((l, i) => !(i === 0 && l.startsWith('#!'))).every(l => l.startsWith('////') && !l.includes('readFileSync') ? false : (console.log(l.replace(/^(\/\/|#)\s*/, '').trimEnd()), true)); process.exit(0); }
+//// End Help
 
 
 // Explanation
-// if ( (process.argv[2] === "--help") || ( process.argv[2] ===  "-h" ) ){   // Run statement only if first argument being -h or --help
-//    require("fs").readFileSync(__filename).toString()                      // Read file to string
-//    .replace(/^.*\n/, '')                                                  // Remove first line
-//    .split(`////`)[0]                                                      // Split at '////'
-//    .replace(/^\s*[\r\n]/gm, '')                                           // Remove blank lines
-//    .replace(/^\/\//gm,'')                                                 // Remove leading '//' 
-//    .replace(/^ /gm,'')                                                    // Remove leading ' '
-//    process.exit();                                                        // Exit script after printing help
+// if (process.argv.slice(2).some(a => ['--help', '-h', '/?'].includes(a))) {                                                                   // Check runtime arguments (excluding node/script paths) for --help, -h, or Windows /?
+//    require('fs').readFileSync(__filename, 'utf8').split('\n')                                                                                // Read current file as a UTF-8 string and split it into an array of individual lines
+//    .filter((l, i) => !(i === 0 && l.startsWith('#!')))                                                                                       // Dynamically drop the shebang row if it exists at index 0, keeping the rest intact
+//    .every(l => l.startsWith('////') && !l.includes('readFileSync') ? false : (console.log(l.replace(/^(\/\/|#)\s*/, '').trimEnd()), true));  // Process lines: return false (stop) if '////' hits, avoiding self-triggering, else clean '//' or '#' and print
+//    process.exit(0);                                                                                                                          // Terminate the Node.js process immediately after printing the help text
 // }
 
 
