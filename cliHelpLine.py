@@ -7,38 +7,36 @@
 #
 # Example use :
 #
-# python cliHelpLine.py hello
-# python cliHelpLine.py --help
-# python cliHelpLine.py -h
-# python cliHelpLine.py /?
+#   python cliHelpLine.py hello
+#   python cliHelpLine.py --help
+#   python cliHelpLine.py -h
+#   python cliHelpLine.py /?
 #
-# ./cliHelpLine.py hello
-# ./cliHelpLine.py --help
-# ./cliHelpLine.py -h
-# ./cliHelpLine.py /?
+#   ./cliHelpLine.py hello
+#   ./cliHelpLine.py --help
+#  ./cliHelpLine.py -h
+#   ./cliHelpLine.py /?
 #
 # ... more help text ...
 
 
 ## Help -- print file header until '##'  (see https://github.com/JanAxelsson/cliHelpLine)
-import sys; [print(line[1:].strip() if line.startswith('#') else line.strip()) for line in open(__file__, encoding='utf-8') if not line.startswith('#!') and (not line.startswith('##') or sys.exit(0))] if any(arg in sys.argv for arg in ('--help', '-h', '/?')) else None  # noqa
-# End Help
+import sys, re; [print(re.sub(r'^# ?', '', line.rstrip('\r\n')) if line.startswith('#') else line.rstrip('\r\n')) for line in open(__file__, encoding='utf-8') if not line.startswith('#!') and (not line.startswith('##') or sys.exit(0))] if any(arg in sys.argv for arg in ('--help', '-h', '/?')) else None  # noqa# End Help
 
 
 
 # Explanation
-#
-# import sys;                                                 # Import system module to access arguments and exit the script
-# if any(arg in sys.argv for arg in ('--help', '-h', '/?')) \ # Run only if any of the help flags are present in command line args
-# else None                                                   # Do nothing if no help flag is found (fallback of the ternary operator)
-# [ ... for line in open(__file__, encoding='utf-8') ... ]    # List comprehension opening the current script file and reading line by line
-# if not line.startswith('#!')                                # Skip the shebang line (e.g., #!/usr/bin/env python) if present
-# and (not line.startswith('##')                              # Continue processing as long as the line does not start with ##
-# or sys.exit(0))                                             # If a line starts with ##, trigger sys.exit(0) to stop immediately
-# print(line[1:].strip() if line.startswith('#')              # If line is a comment, strip the '#' and whitespace, then print it
-# else line.strip())                                          # Otherwise print the stripped line (runs until sys.exit hits)
-# # noqa                                                       # Tell linters to ignore PEP 8 line-length violations for this line
-
+# import sys, re;                                             # Import sys for CLI args/exiting, and re for regular expression substitutions
+# if any(arg in sys.argv for arg in ('--help', '-h', '/?')) \ # Check if any standard help flag exists inside the command line arguments
+# else None                                                   # Fallback condition for the ternary operator if no help flags are present
+# [ ... for line in open(__file__, encoding='utf-8') ... ]    # List comprehension that opens and iterates through this script line by line
+# if not line.startswith('#!')                                # Skip over the environment shebang execution line if it is present
+# and (not line.startswith('##')                              # Keep parsing lines sequentially as long as the '##' divider isn't hit
+# or sys.exit(0))                                             # Short-circuit trigger: if '##' is hit, instantly kill the script process
+# print(re.sub(r'^# ?', '', line.rstrip('\r\n'))             # Clean trailing newlines, then strip starting '#' and exactly ONE optional space
+# if line.startswith('#')                                     # Only apply the character substitution rule if the current row is a comment
+# else line.rstrip('\r\n'))                                   # If it is a normal code line, just drop the trailing newline characters
+# # noqa                                                       # Instruct automated code linters to overlook PEP 8 line length boundaries         
 
 
 

@@ -7,31 +7,34 @@
 //
 // Example use :
 //
-// node cliHelpLine.js
-// node cliHelpLine.js --help
-// node cliHelpLine.js -h
-// node cliHelpLine.js /?
+//   node cliHelpLine.js
+//   node cliHelpLine.js --help
+//   node cliHelpLine.js -h
+//   node cliHelpLine.js /?
 //
-// ./cliHelpLine.js
-// ./cliHelpLine.js --help
-// ./cliHelpLine.js -h
-// ./cliHelpLine.js /?
+//   ./cliHelpLine.js
+//   ./cliHelpLine.js --help
+//   ./cliHelpLine.js -h
+//   ./cliHelpLine.js /?
 //
 // ... more help text ...
 
 //// Help -- print file header until '////'    (see https://github.com/JanAxelsson/cliHelpLine)
-if (process.argv.slice(2).some(a => ['--help', '-h', '/?'].includes(a))) { require('fs').readFileSync(__filename, 'utf8').split('\n').filter((l, i) => !(i === 0 && l.startsWith('#!'))).every(l => l.startsWith('////') && !l.includes('readFileSync') ? false : (console.log(l.replace(/^(\/\/|#)\s*/, '').trimEnd()), true)); process.exit(0); }
-//// End Help
+if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every(line => line.startsWith('#!') ? true : (line.startsWith('////') ? false : (console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }//// End Help
 
 
 // Explanation
-// if (process.argv.slice(2).some(a => ['--help', '-h', '/?'].includes(a))) {                                                                   // Check runtime arguments (excluding node/script paths) for --help, -h, or Windows /?
-//    require('fs').readFileSync(__filename, 'utf8').split('\n')                                                                                // Read current file as a UTF-8 string and split it into an array of individual lines
-//    .filter((l, i) => !(i === 0 && l.startsWith('#!')))                                                                                       // Dynamically drop the shebang row if it exists at index 0, keeping the rest intact
-//    .every(l => l.startsWith('////') && !l.includes('readFileSync') ? false : (console.log(l.replace(/^(\/\/|#)\s*/, '').trimEnd()), true));  // Process lines: return false (stop) if '////' hits, avoiding self-triggering, else clean '//' or '#' and print
-//    process.exit(0);                                                                                                                          // Terminate the Node.js process immediately after printing the help text
-// }
-
+// if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { // Scan runtime arguments to see if --help, -h, or /? is present
+// require('fs').readFileSync(__filename, 'utf-8')                     // Synchronously read the entire current JavaScript file
+// .split(/\r?\n/)                                                      // Split text into an array of rows, supporting both Windows and Unix line endings
+// .every(line =>                                                       // Loop through rows sequentially until any cycle returns false
+// line.startsWith('#!') ? true :                                       // If a Linux shebang row is present at line 1, skip it and continue (return true)
+// (line.startsWith('////') ? false :                                   // If row hits '////', return false to instantly break the loop and stop printing
+// (console.log(                                                        // Otherwise, pass the processed row into the console output stream:
+// line.startsWith('//') ? line.replace(/^\/\/ ?/, '')                  // Clean leading '//' and exactly ONE optional trailing space to preserve indentations
+// : line                                                               // If it is a standard code row, print it out exactly as it is written
+// ), true)));                                                          // Return true to keep the loop rolling onto the very next line
+// process.exit(0); }                                                   // Gracefully close the node application so your main script logic never triggers
 
 // Example code
 console.log("Hello world!");
