@@ -99,9 +99,9 @@ Stage 1: Local Host   Stage 2: Docker     Stage 3: README
 2. **Normal Execution Verification:** Invokes script without arguments. Verifies output falls through cleanly to main code and prints `"Hello world!"` (and NOT the help text).
 
 ### Summary Stages:
-- **Test 1/3: Local host tests:** Verifies `--help` and running without `--help` on macOS/Linux. Missing host runtimes are gracefully reported as `[SKIP]`.
-- **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where all 14 runtimes are installed.
-- **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 14 languages.
+- **Test 1/3: Local host tests:** Verifies `--help` and running without `--help` on macOS/Linux. Missing host runtimes are gracefully reported in quiet text underneath.
+- **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where all Linux runtimes are installed.
+- **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 17 languages.
 
 ### Continuous Integration (GitHub Actions - 3 Platforms):
 Automated CI runs on every push and pull request across all branches via `.github/workflows/tests.yml`.

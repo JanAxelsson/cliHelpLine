@@ -372,6 +372,7 @@ fi
 total_count=0
 fail_count=0
 skip_count=0
+skipped_list=()
 
 expected_tmp=$(mktemp)
 actual_tmp=$(mktemp)
@@ -389,7 +390,7 @@ if [ "$RUN_HELP" -eq 1 ]; then
 
         if ! is_interpreter_available "$target"; then
             interp=$(get_interpreter_name "$target")
-            printf "${YELLOW}[SKIP]${RESET} %s ('%s' not installed)\n" "$target_name" "$interp"
+            skipped_list+=("$target_name ('$interp' not installed)")
             skip_count=$((skip_count + 1))
             continue
         fi
@@ -418,6 +419,10 @@ if [ "$RUN_HELP" -eq 1 ]; then
 
         printf "${GREEN}[ OK ]${RESET} %s\n" "$target_name"
     done
+    if [ "${#skipped_list[@]}" -gt 0 ]; then
+        echo ""
+        printf "Skipped: %s\n" "$(IFS=', '; echo "${skipped_list[*]}")"
+    fi
     echo ""
 fi
 
@@ -457,7 +462,7 @@ fi
 echo ""
 if [ "$fail_count" -eq 0 ]; then
     if [ "$skip_count" -gt 0 ]; then
-        printf "${GREEN}All available tests passed ($((total_count - skip_count))/$total_count, $skip_count skipped)${RESET}\n"
+        printf "${GREEN}All available tests passed ($((total_count - skip_count))/$((total_count - skip_count)))${RESET}\n"
     else
         printf "${GREEN}All tests passed ($total_count/$total_count)${RESET}\n"
     fi
