@@ -139,36 +139,17 @@ jobs:
     if: always()
 
     steps:
-      - name: Generate unified front-page summary
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate unified summary
         env:
           DOCKER_OUT: ${{ needs.test-docker-and-readme.outputs.docker_out }}
           README_OUT: ${{ needs.test-docker-and-readme.outputs.readme_out }}
           MACOS_OUT: ${{ needs.test-macos.outputs.macos_out }}
           WINDOWS_OUT: ${{ needs.test-windows.outputs.windows_out }}
         run: |
-          {
-            echo "## 📊 Unified Test Summary"
-            echo ""
-            echo "### 1. 🐧 Docker Tests (All 14 Languages)"
-            echo '```text'
-            echo "${DOCKER_OUT:-No output available}"
-            echo '```'
-            echo ""
-            echo "### 2. 📖 Sync with README.md"
-            echo '```text'
-            echo "${README_OUT:-No output available}"
-            echo '```'
-            echo ""
-            echo "### 3. 🍏 macOS Tests (Darwin Host)"
-            echo '```text'
-            echo "${MACOS_OUT:-No output available}"
-            echo '```'
-            echo ""
-            echo "### 4. 🪟 Windows Tests (Native Host)"
-            echo '```text'
-            echo "${WINDOWS_OUT:-No output available}"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          bash tests/format_summary.sh
 
       - name: Check overall test status
         if: ${{ needs.test-docker-and-readme.result != 'success' || needs.test-macos.result != 'success' || needs.test-windows.result != 'success' }}

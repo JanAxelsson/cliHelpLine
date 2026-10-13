@@ -16,21 +16,20 @@ function Test-ScriptHelpAndRun {
         [string]$Name,
         [scriptblock]$RunCmd
     )
-    Write-Host "=== Testing $Name on Windows ===" -ForegroundColor Cyan
     
     # 1. Verify --help, -h, /?
     foreach ($flag in @("--help", "-h", "/?")) {
         try {
             $output = & $RunCmd $flag 2>&1 | Out-String
             if ($output -match [regex]::Escape($Name) -and $output -notmatch "Hello world!") {
-                Write-Host "  [ OK ] $Name $flag" -ForegroundColor Green
+                Write-Host "[ OK ] $Name ($flag)"
                 $script:testsPassed++
             } else {
-                Write-Host "  [FAIL] $Name $flag (unexpected output)" -ForegroundColor Red
+                Write-Host "[FAIL] $Name ($flag)"
                 $script:testsFailed++
             }
         } catch {
-            Write-Host "  [FAIL] $Name $flag ($($_.Exception.Message))" -ForegroundColor Red
+            Write-Host "[FAIL] $Name (${flag}: $($_.Exception.Message))"
             $script:testsFailed++
         }
     }
@@ -39,14 +38,14 @@ function Test-ScriptHelpAndRun {
     try {
         $runOut = & $RunCmd "" 2>&1 | Out-String
         if ($runOut.Trim() -eq "Hello world!") {
-            Write-Host "  [ OK ] $Name (normal execution -> 'Hello world!')" -ForegroundColor Green
+            Write-Host "[ OK ] $Name (running without --help)"
             $script:testsPassed++
         } else {
-            Write-Host "  [FAIL] $Name (expected 'Hello world!', got '$($runOut.Trim())')" -ForegroundColor Red
+            Write-Host "[FAIL] $Name (running without --help: expected 'Hello world!', got '$($runOut.Trim())')"
             $script:testsFailed++
         }
     } catch {
-        Write-Host "  [FAIL] $Name normal execution ($($_.Exception.Message))" -ForegroundColor Red
+        Write-Host "[FAIL] $Name (running without --help: $($_.Exception.Message))"
         $script:testsFailed++
     }
 }
@@ -57,15 +56,27 @@ function Find-WorkingCommand {
         $cmds = Get-Command $name -All -ErrorAction SilentlyContinue
         foreach ($c in $cmds) {
             try {
-                $v = & $c.Source --version 2>$null
-                if ($? -and $v -match "\d+\.\d+") {
-                    return $c.Source
+                $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+                $pinfo.FileName = $c.Source
+                $pinfo.Arguments = "--version"
+                $pinfo.RedirectStandardOutput = $true
+                $pinfo.RedirectStandardError = $true
+                $pinfo.UseShellExecute = $false
+                $pinfo.CreateNoWindow = $true
+                $p = [System.Diagnostics.Process]::Start($pinfo)
+                if ($p.WaitForExit(2000)) {
+                    $v = $p.StandardOutput.ReadToEnd()
+                    if ($p.ExitCode -eq 0 -or $v -match "\d+\.\d+") {
+                        return $c.Source
+                    }
                 }
             } catch {}
         }
     }
     return $null
 }
+
+Write-Host "--- Verifying Windows execution (PowerShell /? flag, Python, Node.js)"
 
 # 1. Test PowerShell
 $ps1File = Join-Path $examplesDir "cliHelpLine.ps1"
@@ -97,14 +108,10 @@ if ($nodeCmd -and (Test-Path $jsFile)) {
 }
 
 Write-Host ""
-Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "                  WINDOWS TEST SUMMARY                          " -ForegroundColor Cyan
-Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "  Passed: $testsPassed" -ForegroundColor Green
-if ($testsFailed -gt 0) {
-    Write-Host "  Failed: $testsFailed" -ForegroundColor Red
-    exit 1
-} else {
-    Write-Host "  All Windows tests passed!" -ForegroundColor Green
+if ($testsFailed -eq 0) {
+    Write-Host "All tests passed ($testsPassed/$testsPassed)"
     exit 0
+} else {
+    Write-Host "$testsFailed of $($testsPassed + $testsFailed) tests failed"
+    exit 1
 }
