@@ -283,27 +283,36 @@ for arg in "$@"; do
 done
 
 # Determine files to test
+EXAMPLES_DIR="$PROJECT_ROOT/examples"
 files=()
 if [ "${#filtered_args[@]}" -gt 0 ]; then
     for arg in "${filtered_args[@]}"; do
         arg_clean="${arg#.}"
+        arg_clean="$(basename "$arg_clean")"
         if [ -f "$arg" ]; then
             files+=("$arg")
+        elif [ -f "$EXAMPLES_DIR/$arg" ]; then
+            files+=("$EXAMPLES_DIR/$arg")
         elif [ -f "$PROJECT_ROOT/$arg" ]; then
             files+=("$PROJECT_ROOT/$arg")
+        elif [ -f "$EXAMPLES_DIR/cliHelpLine.$arg_clean" ]; then
+            files+=("$EXAMPLES_DIR/cliHelpLine.$arg_clean")
         elif [ -f "$PROJECT_ROOT/cliHelpLine.$arg_clean" ]; then
             files+=("$PROJECT_ROOT/cliHelpLine.$arg_clean")
         else
             # Match against language name (e.g. 'python' -> cliHelpLine.py)
             matched=""
-            for f in "$PROJECT_ROOT"/cliHelpLine.*; do
-                [ -f "$f" ] || continue
-                lang=$(lang_for_file "$f")
-                if [ "$lang" = "$arg" ]; then
-                    files+=("$f")
-                    matched=1
-                    break
-                fi
+            for search_dir in "$EXAMPLES_DIR" "$PROJECT_ROOT"; do
+                [ -d "$search_dir" ] || continue
+                for f in "$search_dir"/cliHelpLine.*; do
+                    [ -f "$f" ] || continue
+                    lang=$(lang_for_file "$f")
+                    if [ "$lang" = "$arg" ]; then
+                        files+=("$f")
+                        matched=1
+                        break 2
+                    fi
+                done
             done
             if [ -z "$matched" ]; then
                 echo "Warning: No test file found for '$arg'" >&2
@@ -311,7 +320,9 @@ if [ "${#filtered_args[@]}" -gt 0 ]; then
         fi
     done
 else
-    for f in "$PROJECT_ROOT"/cliHelpLine.*; do
+    search_dir="$EXAMPLES_DIR"
+    [ -d "$search_dir" ] || search_dir="$PROJECT_ROOT"
+    for f in "$search_dir"/cliHelpLine.*; do
         [ -f "$f" ] || continue
         # Skip the test script itself or temporary files
         case "$(basename "$f")" in

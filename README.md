@@ -144,7 +144,7 @@ BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO
 
 ## Testing & Local Development
 
-You can clone the repository to test and run the included example scripts:
+You can clone the repository to test and run the included example scripts in `examples/`:
 
 ```bash
 git clone https://github.com/JanAxelsson/cliHelpLine

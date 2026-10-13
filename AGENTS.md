@@ -21,24 +21,24 @@ This document provides essential context, architectural decisions, design rules,
 
 ## 2. Supported Languages (14 Total)
 
-All 14 language examples live in the repository root:
+All 14 language examples live in the `examples/` directory:
 
 | Language | Script File | Comment Char | Boundary Marker (Double-Comment) | Runtime / Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| **Bash** | `cliHelpLine.bash` | `#` | `##` | `bash` |
-| **POSIX Shell** | `cliHelpLine.sh` | `#` | `##` | `sh` (POSIX compliant) |
-| **Zsh** | `cliHelpLine.zsh` | `#` | `##` | `zsh` |
-| **Fish** | `cliHelpLine.fish` | `#` | `##` | `fish` |
-| **Python** | `cliHelpLine.py` | `#` | `##` | `python3` (`sys.argv`, `__file__`) |
-| **JavaScript** | `cliHelpLine.js` | `//` | `////` | `node` (`process.argv`, `__filename`) |
-| **Ruby** | `cliHelpLine.rb` | `#` | `##` | `ruby` (`ARGV`, `__FILE__`) |
-| **Perl** | `cliHelpLine.pl` | `#` | `##` | `perl` (`@ARGV`, `$0`) |
-| **PHP** | `cliHelpLine.php` | `//` | `////` | `php` (`$argv`, `__FILE__`) |
-| **Lua** | `cliHelpLine.lua` | `--` | `----` | `lua` (`arg`, `arg[0]`) |
-| **R** | `cliHelpLine.r` | `#` | `##` | `Rscript` (`commandArgs`) |
-| **PowerShell** | `cliHelpLine.ps1` | `#` | `##` | `pwsh` (`$args`, `$MyInvocation`) |
-| **Tcl** | `cliHelpLine.tcl` | `#` | `##` | `tclsh` (`$argv`, `$argv0`) |
-| **AWK** | `cliHelpLine.awk` | `#` | `##` | `gawk` (GNU Awk required) |
+| **Bash** | `examples/cliHelpLine.bash` | `#` | `##` | `bash` |
+| **POSIX Shell** | `examples/cliHelpLine.sh` | `#` | `##` | `sh` (POSIX compliant) |
+| **Zsh** | `examples/cliHelpLine.zsh` | `#` | `##` | `zsh` |
+| **Fish** | `examples/cliHelpLine.fish` | `#` | `##` | `fish` |
+| **Python** | `examples/cliHelpLine.py` | `#` | `##` | `python3` (`sys.argv`, `__file__`) |
+| **JavaScript** | `examples/cliHelpLine.js` | `//` | `////` | `node` (`process.argv`, `__filename`) |
+| **Ruby** | `examples/cliHelpLine.rb` | `#` | `##` | `ruby` (`ARGV`, `__FILE__`) |
+| **Perl** | `examples/cliHelpLine.pl` | `#` | `##` | `perl` (`@ARGV`, `$0`) |
+| **PHP** | `examples/cliHelpLine.php` | `//` | `////` | `php` (`$argv`, `__FILE__`) |
+| **Lua** | `examples/cliHelpLine.lua` | `--` | `----` | `lua` (`arg`, `arg[0]`) |
+| **R** | `examples/cliHelpLine.r` | `#` | `##` | `Rscript` (`commandArgs`) |
+| **PowerShell** | `examples/cliHelpLine.ps1` | `#` | `##` | `pwsh` (`$args`, `$MyInvocation`) |
+| **Tcl** | `examples/cliHelpLine.tcl` | `#` | `##` | `tclsh` (`$argv`, `$argv0`) |
+| **AWK** | `examples/cliHelpLine.awk` | `#` | `##` | `gawk` (GNU Awk required) |
 
 ---
 
@@ -133,7 +133,7 @@ Stage 1: Local Host   Stage 2: Docker     Stage 3: README
 ## 6. Checklist: How to Add a New Language
 
 When adding language #15:
-1. **Create `cliHelpLine.<ext>`:**
+1. **Create `examples/cliHelpLine.<ext>`:**
    - Shebang (if applicable).
    - Multi-line header documentation.
    - Line 1: `<dcc> Help -- prints header above (stops at '<dcc>')  (see https://github.com/JanAxelsson/cliHelpLine)`

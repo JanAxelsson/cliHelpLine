@@ -15,9 +15,9 @@
 #                                #   3. README.md 2-line snippet verification
 #   ./run_tests.sh <target...>   # Run test stages for specific script or language
 #                                # Examples:
-#                                #   ./run_tests.sh cliHelpLine.py
 #                                #   ./run_tests.sh py
-#                                #   ./run_tests.sh python
+#                                #   ./run_tests.sh cliHelpLine.py
+#                                #   ./run_tests.sh examples/cliHelpLine.py
 #                                #   ./run_tests.sh bash zsh fish
 #   ./run_tests.sh --local, -l   # Run local test + README test only (skips Docker)
 #   ./run_tests.sh --docker, -d  # Run Docker test + README test only (skips local)
