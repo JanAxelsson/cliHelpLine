@@ -101,10 +101,57 @@ Stage 1: Local Host   Stage 2: Docker     Stage 3: README
 - **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 14 languages.
 
 ### Continuous Integration (GitHub Actions - 3 Platforms):
-Automated CI runs on every push and pull request via `.github/workflows/tests.yml` across all 3 major operating systems:
-1. **Linux (`ubuntu-latest`):** Builds and runs the full 14-language Docker test suite (`./run_tests.sh --docker`) using Buildx layer caching.
-2. **macOS (`macos-latest`):** Runs native Darwin tests (`./run_tests.sh --local`) with all runtimes installed via Homebrew.
-3. **Windows (`windows-latest`):** Runs native Windows tests via [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) (`pwsh`, `python`, `node`, `/?` flag) plus README synchronization in Git Bash.
+Automated CI runs on every push and pull request across all branches via `.github/workflows/tests.yml`.
+
+> [!NOTE]
+> The workflow file lives in `.github/workflows/tests.yml`. Because its folder begins with a dot (`.`), it is hidden by default in macOS Finder (press `Cmd` + `Shift` + `.` to reveal) and `ls` (use `ls -la`), but it is **fully tracked and version-controlled by Git** (never ignored by `.gitignore`).
+
+#### Architecture Overview
+```text
+┌────────────────────────┐  ┌──────────────┐  ┌────────────────┐
+│ test-docker-and-readme │  │  test-macos  │  │  test-windows  │
+│     (ubuntu-latest)    │  │(macos-latest)│  │(windows-latest)│
+└───────────┬────────────┘  └──────┬───────┘  └───────┬────────┘
+            │                      │                  │
+            └──────────────┬───────┴──────────────────┘
+                           ▼
+                ┌─────────────────────┐
+                │       summary       │
+                │   (ubuntu-latest)   │
+                │ Generates Dashboard │
+                └─────────────────────┘
+```
+
+#### The 4 Jobs Explained:
+1. **`test-docker-and-readme` (Linux `ubuntu-latest`):**
+   - **Docker Buildx Cache:** Uses GitHub Actions cache (`type=gha`) to cache the `clihelpline-tester` Docker image layers, speeding up builds to seconds.
+   - **Stage 1 (Docker Full Suite):** Runs `tests/test_cliHelpLine.sh --help-only` inside the Docker container, testing all 14 runtimes for both `--help` output and normal execution (`"Hello world!"`).
+   - **Stage 2 (README Sync):** Runs `tests/test_cliHelpLine.sh --readme-only` on the host, verifying all 14 language snippets against `README.md` byte-for-byte.
+   - **Output Passing:** Emits stripped text results directly to job outputs (`$GITHUB_OUTPUT`) in memory without creating fragile blob zip artifacts.
+
+2. **`test-macos` (macOS `macos-latest`):**
+   - **Native Darwin Runner:** Executes on Apple Silicon (M-series) macOS hardware.
+   - **Homebrew Setup:** Installs `gawk`, `fish`, `lua`, `php`, and `r` via Homebrew (`pwsh`, `python3`, `node`, `ruby`, `perl`, `bash`, `zsh` are pre-installed).
+   - **Stage 3 (macOS Native Tests):** Runs `tests/test_cliHelpLine.sh --help-only` directly on Darwin, guaranteeing BSD `sed`, `gawk`, and macOS permission compatibility. Does **not** re-run README sync (avoids test duplication).
+   - **Output Passing:** Emits results to `$GITHUB_OUTPUT`.
+
+3. **`test-windows` (Windows `windows-latest`):**
+   - **Native Windows Server Runner:** Executes natively in PowerShell 7 (`pwsh`).
+   - **Stage 4 (Windows Native Tests):** Runs [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) to verify PowerShell (`pwsh`), Python, and Node.js.
+   - **Windows-Specific Validation:** Explicitly tests the native Windows **`/?`** flag in addition to `-h` and `--help`, plus normal execution. Does **not** re-run README sync (avoids test duplication).
+   - **Output Passing:** Emits results to `$env:GITHUB_OUTPUT`.
+
+4. **`summary` (Unified Front-Page Dashboard):**
+   - Runs on `ubuntu-latest` after all 3 parallel test jobs complete (`if: always()`).
+   - Receives the 4 stage outputs via environment variables and executes [`tests/format_summary.sh`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/format_summary.sh).
+   - **Zero Console Clutter:** Suppresses bash execution tracing so that opening the job log displays only pristine, formatted output.
+   - **Front-Page Step Summary:** Writes Markdown directly to `$GITHUB_STEP_SUMMARY`, rendering all 4 stages in exact requested order on the GitHub Actions run homepage:
+     1. 🐧 Docker Tests (All 14 Languages)
+     2. 📖 Sync with README.md
+     3. 🍏 macOS Tests (Darwin Host)
+     4. 🪟 Windows Tests (Native Host)
+     5. 🏆 Total Test Summary (All 54 tests)
+   - Evaluates prerequisite job statuses and exits with code 1 if any stage experienced a failure.
 
 ---
 
