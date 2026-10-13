@@ -1,6 +1,9 @@
 # cliHelpLine
 
-> Turn your script's header comments into `--help`, `-h`, and `/?` output with a 2-line snippet. Inspired by MATLAB's comment-based help—zero dependencies, zero boilerplate, and cross-platform.
+> **Turn your script's header comments into `--help`, `-h`, and `/?` output with a 2-line snippet.**  
+> Zero dependencies, zero boilerplate, and cross-platform across 14 scripting languages.
+
+In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help is effortless: the comments at the top of a file automatically become the documentation. `cliHelpLine` brings that exact zero-overhead pattern to Bash, Python, Node.js, Ruby, and 10 other languages—no heavyweight CLI frameworks or argument-parsing libraries required.
 
 <!-- Optional: Demo GIF can be embedded here -->
 <!-- ![cliHelpLine Demo](demo.gif) -->
@@ -170,4 +173,4 @@ If you want to add support for another scripting language, feel free to open an 
 
 ## License
 
-This project is open-source. Check the repository files for explicit licensing details.
+This project is licensed under the [MIT License](LICENSE) — feel free to copy, modify, distribute, and include these snippets in any project, whether personal, open-source, or commercial.
