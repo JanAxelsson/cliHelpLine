@@ -20,16 +20,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 README_FILE="$PROJECT_ROOT/README.md"
 
-# Function to run a cliHelpLine script with --help
-run_script_help() {
+# Function to execute a cliHelpLine script with optional arguments
+run_script() {
     local target="$1"
-    local help_flag="${2:---help}"
+    shift
     local ext="${target##*.}"
     local output
 
     # 1. Try direct execution if executable
     if [ -x "$target" ]; then
-        if output=$( RUBYOPT="--disable-gems" "$target" "$help_flag" 2>/dev/null ); then
+        if output=$( RUBYOPT="--disable-gems" "$target" "$@" 2>/dev/null ); then
             printf "%s\n" "$output"
             return 0
         fi
@@ -38,53 +38,61 @@ run_script_help() {
     # 2. Fall back to interpreter based on file extension
     case "$ext" in
         bash)
-            bash "$target" "$help_flag" 2>/dev/null ;;
+            bash "$target" "$@" 2>/dev/null ;;
         sh)
-            sh "$target" "$help_flag" 2>/dev/null ;;
+            sh "$target" "$@" 2>/dev/null ;;
         zsh)
-            zsh "$target" "$help_flag" 2>/dev/null ;;
+            zsh "$target" "$@" 2>/dev/null ;;
         fish)
-            fish "$target" "$help_flag" 2>/dev/null ;;
+            fish "$target" "$@" 2>/dev/null ;;
         py)
-            if command -v python3 >/dev/null 2>&1 && output=$(python3 "$target" "$help_flag" 2>/dev/null); then
+            if command -v python3 >/dev/null 2>&1 && output=$(python3 "$target" "$@" 2>/dev/null); then
                 printf "%s\n" "$output"
             elif [ -x /opt/homebrew/bin/python3 ]; then
-                /opt/homebrew/bin/python3 "$target" "$help_flag" 2>/dev/null
+                /opt/homebrew/bin/python3 "$target" "$@" 2>/dev/null
             elif [ -x /usr/bin/python3 ]; then
-                /usr/bin/python3 "$target" "$help_flag" 2>/dev/null
+                /usr/bin/python3 "$target" "$@" 2>/dev/null
             elif command -v python >/dev/null 2>&1; then
-                python "$target" "$help_flag" 2>/dev/null
+                python "$target" "$@" 2>/dev/null
             fi ;;
         js|mjs|cjs)
-            if command -v node >/dev/null 2>&1 && output=$(node "$target" "$help_flag" 2>/dev/null); then
+            if command -v node >/dev/null 2>&1 && output=$(node "$target" "$@" 2>/dev/null); then
                 printf "%s\n" "$output"
             elif [ -x /usr/local/bin/node ]; then
-                /usr/local/bin/node "$target" "$help_flag" 2>/dev/null
+                /usr/local/bin/node "$target" "$@" 2>/dev/null
             elif [ -x /opt/homebrew/bin/node ]; then
-                /opt/homebrew/bin/node "$target" "$help_flag" 2>/dev/null
+                /opt/homebrew/bin/node "$target" "$@" 2>/dev/null
             fi ;;
         rb)
-            RUBYOPT="--disable-gems" ruby --disable-gems "$target" "$help_flag" 2>/dev/null ;;
+            RUBYOPT="--disable-gems" ruby --disable-gems "$target" "$@" 2>/dev/null ;;
         pl)
-            perl "$target" "$help_flag" 2>/dev/null ;;
+            perl "$target" "$@" 2>/dev/null ;;
         php)
-            php "$target" "$help_flag" 2>/dev/null ;;
+            php "$target" "$@" 2>/dev/null ;;
         lua)
-            lua "$target" "$help_flag" 2>/dev/null || lua5.4 "$target" "$help_flag" 2>/dev/null ;;
+            lua "$target" "$@" 2>/dev/null || lua5.4 "$target" "$@" 2>/dev/null ;;
         r|R)
-            Rscript "$target" "$help_flag" 2>/dev/null ;;
+            Rscript "$target" "$@" 2>/dev/null ;;
         ps1)
-            pwsh -NoProfile -File "$target" "$help_flag" 2>/dev/null ;;
+            pwsh -NoProfile -File "$target" "$@" 2>/dev/null ;;
         tcl)
-            tclsh "$target" "$help_flag" 2>/dev/null ;;
+            tclsh "$target" "$@" 2>/dev/null ;;
         awk)
-            if command -v gawk >/dev/null 2>&1; then
-                gawk -f "$target" -- "$help_flag" 2>/dev/null
-            elif command -v awk >/dev/null 2>&1; then
-                awk -f "$target" -- "$help_flag" 2>/dev/null
+            if [ "$#" -gt 0 ]; then
+                if command -v gawk >/dev/null 2>&1; then
+                    gawk -f "$target" -- "$@" 2>/dev/null
+                elif command -v awk >/dev/null 2>&1; then
+                    awk -f "$target" -- "$@" 2>/dev/null
+                fi
+            else
+                if command -v gawk >/dev/null 2>&1; then
+                    gawk -f "$target" 2>/dev/null
+                elif command -v awk >/dev/null 2>&1; then
+                    awk -f "$target" 2>/dev/null
+                fi
             fi ;;
         *)
-            "$target" "$help_flag" 2>/dev/null ;;
+            "$target" "$@" 2>/dev/null ;;
     esac
 }
 
@@ -324,13 +332,14 @@ skip_count=0
 
 expected_tmp=$(mktemp)
 actual_tmp=$(mktemp)
+run_actual_tmp=$(mktemp)
 script_snip_tmp=$(mktemp)
 readme_snip_tmp=$(mktemp)
-trap 'rm -f "$expected_tmp" "$actual_tmp" "$script_snip_tmp" "$readme_snip_tmp"' EXIT
+trap 'rm -f "$expected_tmp" "$actual_tmp" "$run_actual_tmp" "$script_snip_tmp" "$readme_snip_tmp"' EXIT
 
-# --- Part 1: Verify output from --help against header ---
+# --- Part 1: Verify --help output and running script without --help ('Hello world!') ---
 if [ "$RUN_HELP" -eq 1 ]; then
-    echo "--- Verifying header against --help output ---"
+    echo "--- Verifying --help and running script without --help ('Hello world!') "
     for target in "${files[@]}"; do
         total_count=$((total_count + 1))
         target_name="$(basename "$target")"
@@ -342,24 +351,36 @@ if [ "$RUN_HELP" -eq 1 ]; then
             continue
         fi
 
+        # 1. Help output verification: --help must match header comments and stop
         extract_expected_help "$target" > "$expected_tmp"
-        run_script_help "$target" "--help" > "$actual_tmp"
+        run_script "$target" "--help" > "$actual_tmp"
 
-        if cmp -s "$expected_tmp" "$actual_tmp"; then
-            printf "${GREEN}[ OK ]${RESET} %s\n" "$target_name"
-        else
-            printf "${RED}[FAIL]${RESET} %s\n" "$target_name"
+        if ! cmp -s "$expected_tmp" "$actual_tmp"; then
+            printf "${RED}[FAIL]${RESET} %s (--help output mismatch)\n" "$target_name"
             fail_count=$((fail_count + 1))
             show_side_by_side "$expected_tmp" "$actual_tmp" \
                 "Expected ($target_name headers)" "Actual ($target_name --help)"
+            continue
         fi
+
+        # 2. Running without --help: must execute main script and print 'Hello world!'
+        run_script "$target" > "$run_actual_tmp"
+        run_output=$(tr -d '\r' < "$run_actual_tmp" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+        if [ "$run_output" != "Hello world!" ]; then
+            printf "${RED}[FAIL]${RESET} %s (running without --help failed: expected 'Hello world!', got '%s')\n" "$target_name" "$run_output"
+            fail_count=$((fail_count + 1))
+            continue
+        fi
+
+        printf "${GREEN}[ OK ]${RESET} %s\n" "$target_name"
     done
     echo ""
 fi
 
 # --- Part 2: Verify comment + one-liner against README.md ---
 if [ "$RUN_README" -eq 1 ]; then
-    echo "--- Verifying 2-line code snippet against README.md ---"
+    echo "--- Verifying 2-line code snippet against README.md "
     if [ ! -f "$README_FILE" ]; then
         echo "Error: README.md not found at $README_FILE" >&2
         fail_count=$((fail_count + 1))

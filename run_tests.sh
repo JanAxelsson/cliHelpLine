@@ -147,9 +147,9 @@ has_failure=0
 # Test 1: Local host tests
 # ============================================================
 if [ "$MODE" != "docker" ]; then
-    echo "============================================================"
-    echo "=== Test 1/3: Local host tests ($(uname -s)) ==="
-    echo "============================================================"
+    echo "===================================================================="
+    echo "=== Test 1/3: Local host tests ($(uname -s))"
+    echo "===================================================================="
     local_fail=0
     if [ "${#ARGS[@]}" -gt 0 ]; then
         bash "$PROJECT_ROOT/tests/test_cliHelpLine.sh" --help-only "${ARGS[@]}" || local_fail=1
@@ -168,9 +168,9 @@ fi
 # Test 2: Full test suite inside Docker
 # ============================================================
 if [ "$MODE" != "local" ]; then
-    echo "============================================================"
-    echo "=== Test 2/3: Full test suite inside Docker ($IMAGE_NAME) ==="
-    echo "============================================================"
+    echo "===================================================================="
+    echo "=== Test 2/3: Full test suite inside Docker ($IMAGE_NAME)"
+    echo "===================================================================="
     ensure_docker_running
 
     # Build image if it doesn't exist or if --build was passed
@@ -214,9 +214,9 @@ test_readme_label="Test 3/3"
 [ "$MODE" = "local" ] && test_readme_label="Test 2/2"
 [ "$MODE" = "docker" ] && test_readme_label="Test 2/2"
 
-echo "============================================================"
-echo "=== $test_readme_label: README.md verification ==="
-echo "============================================================"
+echo "===================================================================="
+echo "=== $test_readme_label: README.md verification "
+echo "===================================================================="
 readme_fail=0
 if [ "${#ARGS[@]}" -gt 0 ]; then
     bash "$PROJECT_ROOT/tests/test_cliHelpLine.sh" --readme-only "${ARGS[@]}" || readme_fail=1
@@ -233,9 +233,9 @@ echo ""
 # ============================================================
 # Summary
 # ============================================================
-echo "============================================================"
+echo "================================================================"
 echo "                     TEST SUMMARY                           "
-echo "============================================================"
+echo "================================================================"
 if [ "$MODE" != "docker" ]; then
     if [ "$pass_local" -eq 1 ]; then
         printf "  ${GREEN}[ OK ]${RESET} Test 1: Local host ($(uname -s))\n"
@@ -255,7 +255,7 @@ if [ "$pass_readme" -eq 1 ]; then
 else
     printf "  ${RED}[FAIL]${RESET} Test 3: README.md synchronization\n"
 fi
-echo "============================================================"
+echo "================================================================"
 
 if [ "$has_failure" -eq 0 ]; then
     printf "${GREEN}All tests passed!${RESET}\n"
