@@ -14,9 +14,6 @@
 #
 # ... more help text ...
 
-
-
-
 ## Help -- print file header until '##'   (see https://github.com/JanAxelsson/cliHelpLine)
 if [ "$1" == "--help" ] || [ "$1" == "-h" ] || [ "$1" == "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' $0 | sed '$d'; exit 0; fi 
 
