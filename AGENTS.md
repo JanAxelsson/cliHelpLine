@@ -229,6 +229,9 @@ When adding language #18+:
 5. **Verify:**
    - Run `./run_tests.sh --local` and `./run_tests.sh --docker` (or `./run_tests.sh --build`).
    - Ensure all 3 test stages pass.
+6. **Update `AGENTS.md`:**
+   - Add the new language to the table in Section 2 (alphabetical order).
+   - Increment total language counts in the documentation.
 
 ---
 
@@ -246,6 +249,7 @@ The repository follows a clean two-branch development model:
 
 ### How `AGENTS.md` Is Handled Across Branches
 - `AGENTS.md` is a version-controlled Git file tracked in the repository root.
+- **Proactive Maintenance Rule:** Agents must automatically update `AGENTS.md` on `develop` without waiting for explicit user prompts whenever architectural decisions, CI modifications, new language support, or testing conventions are added or altered. Always summarize any updates made to `AGENTS.md` in the response.
 - **Always update `AGENTS.md` on `develop`:** Since everyday work happens on `develop`, keeping `AGENTS.md` updated here ensures that agents and human contributors always have access to the latest architectural guidelines, checklists, and lessons learned.
 - **Automatic propagation to `main`:** When `develop` is merged into `main` during a release, `main` automatically receives the exact updated version of `AGENTS.md`. No separate manual syncing or cherry-picking is required.
 
