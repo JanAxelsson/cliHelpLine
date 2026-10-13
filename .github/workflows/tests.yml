@@ -9,10 +9,10 @@ on:
 
 jobs:
   # ============================================================
-  # 1. Linux Job: Full Docker test suite with all 14 runtimes
+  # 1. Linux Job: Docker test suite (14 languages) & README sync
   # ============================================================
-  linux-docker:
-    name: Linux (Docker - All 14 languages)
+  test-docker-and-readme:
+    name: Linux (Docker & README Sync)
     runs-on: ubuntu-latest
 
     steps:
@@ -32,16 +32,46 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Run full test suite in Docker
+      - name: Run Docker test suite (All 14 languages)
         run: |
-          chmod +x run_tests.sh tests/test_cliHelpLine.sh
-          ./run_tests.sh --docker
+          set +e
+          docker run --rm -v "$PWD:/workspace" -w /workspace clihelpline-tester \
+            bash tests/test_cliHelpLine.sh --help-only > docker-raw.txt
+          EXIT_CODE=$?
+          set -e
+          sed -E 's/\x1B\[[0-9;]*[a-zA-Z]//g' docker-raw.txt > docker-results.txt
+          cat docker-results.txt
+          exit $EXIT_CODE
+
+      - name: Run README.md snippet verification
+        run: |
+          set +e
+          bash tests/test_cliHelpLine.sh --readme-only > readme-raw.txt
+          EXIT_CODE=$?
+          set -e
+          sed -E 's/\x1B\[[0-9;]*[a-zA-Z]//g' readme-raw.txt > readme-results.txt
+          cat readme-results.txt
+          exit $EXIT_CODE
+
+      - name: Upload Docker test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-results
+          path: docker-results.txt
+
+      - name: Upload README sync results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: readme-results
+          path: readme-results.txt
 
   # ============================================================
-  # 2. macOS Job: Native macOS host tests (Darwin / Apple Silicon)
+  # 2. macOS Job: Native Darwin tests (No README duplicate)
   # ============================================================
-  macos-native:
-    name: macOS (Native Host - Darwin)
+  test-macos:
+    name: macOS (Darwin Host)
     runs-on: macos-latest
 
     steps:
@@ -52,15 +82,27 @@ jobs:
         run: |
           brew install gawk fish lua php r
 
-      - name: Run local tests on macOS
+      - name: Run native macOS tests
         run: |
-          chmod +x run_tests.sh tests/test_cliHelpLine.sh
-          ./run_tests.sh --local
+          set +e
+          bash tests/test_cliHelpLine.sh --help-only > macos-raw.txt
+          EXIT_CODE=$?
+          set -e
+          sed -E 's/\x1B\[[0-9;]*[a-zA-Z]//g' macos-raw.txt > macos-results.txt
+          cat macos-results.txt
+          exit $EXIT_CODE
+
+      - name: Upload macOS test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-results
+          path: macos-results.txt
 
   # ============================================================
-  # 3. Windows Job: Native Windows tests (pwsh, python, node, /?)
+  # 3. Windows Job: Native Windows tests (pwsh, py, js, /?)
   # ============================================================
-  windows-native:
+  test-windows:
     name: Windows (Native Host)
     runs-on: windows-latest
 
@@ -71,11 +113,82 @@ jobs:
       - name: Run native Windows test suite (pwsh)
         shell: pwsh
         run: |
-          & pwsh -NoProfile -File tests/test_windows.ps1
+          $ErrorActionPreference = "Continue"
+          & pwsh -NoProfile -File tests/test_windows.ps1 | Out-File -FilePath windows-raw.txt -Encoding utf8
+          $winExit = $LASTEXITCODE
+          Get-Content windows-raw.txt | ForEach-Object { $_ -replace '\x1B\[[0-9;]*[a-zA-Z]', '' } | Set-Content windows-results.txt -Encoding utf8
+          Get-Content windows-results.txt
+          if ($winExit -ne 0) { exit $winExit }
 
-      - name: Run README.md snippet verification (Git Bash)
-        shell: bash
-        env:
-          MSYS_NO_PATHCONV: "1"
+      - name: Upload Windows test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-results
+          path: windows-results.txt
+
+  # ============================================================
+  # 4. Summary Dashboard: Front-page unified report in exact order
+  # ============================================================
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-docker-and-readme, test-macos, test-windows]
+    if: always()
+
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          path: results
+          merge-multiple: true
+
+      - name: Generate unified front-page summary
         run: |
-          bash tests/test_cliHelpLine.sh --readme-only
+          echo "## 📊 Unified Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### 1. 🐧 Docker Tests (All 14 Languages)" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          if [ -f results/docker-results.txt ]; then
+            cat results/docker-results.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Docker tests were not executed or failed prematurely." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### 2. 📖 Sync with README.md" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          if [ -f results/readme-results.txt ]; then
+            cat results/readme-results.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "README sync test was not executed or failed prematurely." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### 3. 🍏 macOS Tests (Darwin Host)" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          if [ -f results/macos-results.txt ]; then
+            cat results/macos-results.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "macOS tests were not executed or failed prematurely." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### 4. 🪟 Windows Tests (Native Host)" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          if [ -f results/windows-results.txt ]; then
+            cat results/windows-results.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Windows tests were not executed or failed prematurely." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Check overall test status
+        if: ${{ needs.test-docker-and-readme.result != 'success' || needs.test-macos.result != 'success' || needs.test-windows.result != 'success' }}
+        run: |
+          echo "::error::One or more test suites failed."
+          exit 1
