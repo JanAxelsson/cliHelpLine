@@ -24,7 +24,36 @@ Zero dependencies, zero boilerplate, and cross-platform.
 
 - Paste the code (below) after your commented header. 
 
-  ## FAQ
+## Example
+
+1. In your script (e.g. `backup.sh`), write your header comments followed by the 2-line snippet:
+
+```bash
+#!/bin/bash
+# backup.sh - Quick directory backup tool
+# Usage: ./backup.sh <source> <target>
+
+## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
+
+cp -r "$1" "$2"
+echo "Backup complete!"
+```
+
+2. Request help from the command line:
+
+```bash
+./backup.sh --help
+```
+
+3. Clean help text is displayed directly from the header comments:
+
+```text
+backup.sh - Quick directory backup tool
+Usage: ./backup.sh <source> <target>
+```
+
+## FAQ
 - Shebangs (such as `#!/bin/bash`) are allowed, and will be ignored in help text.
 
 - Empty lines are ignored

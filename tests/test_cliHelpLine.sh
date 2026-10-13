@@ -180,8 +180,9 @@ extract_readme_snippet() {
     local lang="$1"
     local readme="$2"
     awk -v lang="$lang" '
-        BEGIN { in_block = 0; count = 0 }
-        tolower($0) ~ "^```" tolower(lang) "$" { in_block = 1; next }
+        BEGIN { in_code_section = 0; in_block = 0; count = 0 }
+        /^## Code to use/ { in_code_section = 1 }
+        in_code_section && tolower($0) ~ "^```" tolower(lang) "$" { in_block = 1; next }
         in_block && /^```/ { exit }
         in_block && count < 2 { print; count++ }
     ' "$readme"
