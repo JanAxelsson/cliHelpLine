@@ -148,13 +148,16 @@ git clone https://github.com/JanAxelsson/cliHelpLine
 cd cliHelpLine
 ```
 
-A multi-language test suite is included to verify all scripts either inside Docker (with all 14 runtimes pre-installed) or natively on your host system:
+A 3-stage multi-language test suite is included to thoroughly verify all scripts:
 
 ```bash
-./run_tests.sh               # Run all 14 languages inside Docker (auto-builds image if needed)
-./run_tests.sh --local, -l   # Run locally on host system (verifies available runtimes)
-./run_tests.sh python        # Run test for a specific language (or e.g. py, cliHelpLine.py)
-./run_tests.sh -l bash zsh   # Run tests locally for specific targets
+./run_tests.sh               # Runs all 3 test stages:
+                             #   1. Local host verification (Darwin/Linux)
+                             #   2. Docker full-suite verification (all 14 languages)
+                             #   3. README.md code snippet synchronization
+./run_tests.sh --local, -l   # Run local test + README test only (skips Docker)
+./run_tests.sh --docker, -d  # Run Docker test + README test only (skips local)
+./run_tests.sh python        # Run test stages for a specific language (or e.g. py)
 ./run_tests.sh --build       # Force rebuild the Docker test image
 ./run_tests.sh --help        # Show all test runner options
 ```
