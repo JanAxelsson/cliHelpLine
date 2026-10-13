@@ -10,7 +10,7 @@ Adds `--help` flag to command line using the file's header comment as the help t
 
 - **No Boilerplate:** Say goodbye to complex argument parsing libraries for simple scripts.
 - **Single Source of Truth:** Your documentation lives inside the code comments at the very top of the file.
-- **Multi-language Support:** Works seamlessly across Bash, Zsh, Python, JavaScript (Node.js), Ruby, Perl, PHP, Lua, R, PowerShell, Tcl, and AWK.
+- **Multi-language Support:** Works seamlessly across Bash, Sh, Zsh, Fish, Python, JavaScript (Node.js), Ruby, Perl, PHP, Lua, R, PowerShell, Tcl, and AWK.
 
 ## How to use
 
@@ -34,10 +34,22 @@ Copy and paste the following code for your language after the header
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 ```
 
+### Sh (POSIX)
+```sh
+## Help -- print file header until '##'  (see https://github.com/JanAxelsson/cliHelpLine)
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
+```
+
 ### Zsh
 ```zsh
 ## Help -- print file header until '##'  (see https://github.com/JanAxelsson/cliHelpLine)
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
+```
+
+### Fish
+```fish
+## Help -- print file header until '##'  (see https://github.com/JanAxelsson/cliHelpLine)
+if contains -- "$argv[1]" --help -h '/?'; sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' (status filename) | sed '$d'; exit 0; end
 ```
 
 ### Python

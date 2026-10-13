@@ -36,10 +36,14 @@ run_script_help() {
 
     # 2. Fallback till tolk baserat på filändelse
     case "$ext" in
-        bash|sh)
+        bash)
             bash "$target" "$help_flag" 2>/dev/null ;;
+        sh)
+            sh "$target" "$help_flag" 2>/dev/null ;;
         zsh)
             zsh "$target" "$help_flag" 2>/dev/null ;;
+        fish)
+            fish "$target" "$help_flag" 2>/dev/null ;;
         py)
             if command -v python3 >/dev/null 2>&1 && output=$(python3 "$target" "$help_flag" 2>/dev/null); then
                 printf "%s\n" "$output"
@@ -83,8 +87,10 @@ run_script_help() {
 lang_for_file() {
     local ext="${1##*.}"
     case "$ext" in
-        bash|sh)    echo "bash" ;;
+        bash)       echo "bash" ;;
+        sh)         echo "sh" ;;
         zsh)        echo "zsh" ;;
+        fish)       echo "fish" ;;
         py)         echo "python" ;;
         js|mjs|cjs) echo "javascript" ;;
         rb)         echo "ruby" ;;
