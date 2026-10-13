@@ -2,20 +2,15 @@
 #
 # Example script
 # ==============
-#
+# 
 # This is my help text ...
 #
 # Example use :
 #
-#   python cliHelpLine.py hello
-#   python cliHelpLine.py --help
-#   python cliHelpLine.py -h
-#   python cliHelpLine.py /?
-#
-#   ./cliHelpLine.py hello
-#   ./cliHelpLine.py --help
-#  ./cliHelpLine.py -h
-#   ./cliHelpLine.py /?
+#   ./cliHelpLine.py         # Run script
+#   ./cliHelpLine.py --help  # Help on script
+#   ./cliHelpLine.py -h      # Help on script
+#   ./cliHelpLine.py /?      # Help on script
 #
 # ... more help text ...
 
@@ -36,10 +31,8 @@ import sys, re; [print(re.sub(r'^# ?', '', line.rstrip('\r\n')) if line.startswi
 # print(re.sub(r'^# ?', '', line.rstrip('\r\n'))             # Clean trailing newlines, then strip starting '#' and exactly ONE optional space
 # if line.startswith('#')                                     # Only apply the character substitution rule if the current row is a comment
 # else line.rstrip('\r\n'))                                   # If it is a normal code line, just drop the trailing newline characters
-# # noqa                                                       # Instruct automated code linters to overlook PEP 8 line length boundaries         
+# # noqa                                                       # Instruct automated code linters to overlook PEP 8 line length boundaries
 
 
-
-
-# Example code
-print('Hello World!')
+# Runnable code
+print("Hello world!")

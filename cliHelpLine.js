@@ -7,20 +7,16 @@
 //
 // Example use :
 //
-//   node cliHelpLine.js
-//   node cliHelpLine.js --help
-//   node cliHelpLine.js -h
-//   node cliHelpLine.js /?
-//
-//   ./cliHelpLine.js
-//   ./cliHelpLine.js --help
-//   ./cliHelpLine.js -h
-//   ./cliHelpLine.js /?
+//   ./cliHelpLine.js         // Run script
+//   ./cliHelpLine.js --help  // Help on script
+//   ./cliHelpLine.js -h      // Help on script
+//   ./cliHelpLine.js /?      // Help on script
 //
 // ... more help text ...
 
-//// Help -- print file header until '////'    (see https://github.com/JanAxelsson/cliHelpLine)
+//// Help -- print file header until '////'  (see https://github.com/JanAxelsson/cliHelpLine)
 if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every(line => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
+
 
 
 // Explanation
@@ -37,5 +33,6 @@ if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('f
 // ), true)));                                                          // Return true to keep the loop rolling onto the very next line
 // process.exit(0); }                                                   // Gracefully close the node application so your main script logic never triggers
 
-// Example code
+
+// Runnable code
 console.log("Hello world!");
