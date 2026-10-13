@@ -58,129 +58,129 @@ Copy and paste the two lines corresponding to your programming language right af
 > [AWK](#awk) · [Bash](#bash) · [Fish](#fish) · [JavaScript](#javascript) · [Julia](#julia) · [Lua](#lua) · [Perl](#perl) · [PHP](#php) · [PowerShell](#powershell) · [Python](#python) · [R](#r) · [Ruby](#ruby) · [Sh](#sh) · [Swift](#swift) · [Tcl](#tcl) · [TypeScript](#typescript) · [Zsh](#zsh)
 
 <a id="awk"></a>
-### AWK · [`cliHelpLine.awk`](examples/cliHelpLine.awk)
+### AWK
 ```awk
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO["argv"]) if (PROCINFO["argv"][a] ~ /^-[fE]$/) f=PROCINFO["argv"][a+1]; while ((getline l < f) > 0) { if (++nr == 1 && l ~ /^#!/ ) continue; if (l ~ /^##/) break; if (l ~ /^#/ || l ~ /\S/) { sub(/^# ?/, "", l); print l } } exit 0 } }
 ```
 > <small>**Important:** Your script must use `#!/usr/bin/env -S gawk -E` on line 1 (the `-E` flag prevents AWK from intercepting `--help`, and `gawk` is required for `PROCINFO` so the script can locate its own file). On macOS, install via `brew install gawk`; on Linux, `gawk` is typically standard.</small>
 
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.awk`](examples/cliHelpLine.awk) · [↑](#languages "Back to languages")</small>
 
 <a id="bash"></a>
-### Bash · [`cliHelpLine.bash`](examples/cliHelpLine.bash)
+### Bash
 ```bash
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.bash`](examples/cliHelpLine.bash) · [↑](#languages "Back to languages")</small>
 
 <a id="fish"></a>
-### Fish · [`cliHelpLine.fish`](examples/cliHelpLine.fish)
+### Fish
 ```fish
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if contains -- "$argv[1]" --help -h '/?'; sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' (status filename) | sed '$d'; exit 0; end
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.fish`](examples/cliHelpLine.fish) · [↑](#languages "Back to languages")</small>
 
 <a id="javascript"></a>
-### JavaScript · [`cliHelpLine.js`](examples/cliHelpLine.js)
+### JavaScript
 ```javascript
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every(line => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.js`](examples/cliHelpLine.js) · [↑](#languages "Back to languages")</small>
 
 <a id="julia"></a>
-### Julia · [`cliHelpLine.jl`](examples/cliHelpLine.jl)
+### Julia
 ```julia
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if any(in(["--help", "-h", "/?"]), ARGS); for l in eachline(@__FILE__); startswith(l, "#!") && continue; startswith(l, "##") && exit(0); (startswith(l, "#") || !isempty(strip(l))) && println(startswith(l, "#") ? replace(l, r"^# ?"=>"") : l); end; exit(0); end
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.jl`](examples/cliHelpLine.jl) · [↑](#languages "Back to languages")</small>
 
 <a id="lua"></a>
-### Lua · [`cliHelpLine.lua`](examples/cliHelpLine.lua)
+### Lua
 ```lua
 ---- Help -- prints header above (stops at '----')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (function(args) for _,a in ipairs(args) do if a=="--help" or a=="-h" or a=="/?" then return true end end return false end)(arg or {}) then local f=io.open(arg[0],"r"); local n=0; for l in f:lines() do n=n+1; if not (n==1 and l:match("^#!")) then if l:match("^%-%-%-%-") then break end if l:match("^%-%-") or l:match("%S") then print((l:gsub("^%-%- ?", ""))) end end end; os.exit(0); end
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.lua`](examples/cliHelpLine.lua) · [↑](#languages "Back to languages")</small>
 
 <a id="perl"></a>
-### Perl · [`cliHelpLine.pl`](examples/cliHelpLine.pl)
+### Perl
 ```perl
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (grep { $_ eq '--help' || $_ eq '-h' || $_ eq '/?' } @ARGV) { open my $f, '<', $0; while (<$f>) { next if $. == 1 && /^#!/; last if /^##/; if (/^#/ || /\S/) { s/^# ?//; print; } } exit 0; }
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.pl`](examples/cliHelpLine.pl) · [↑](#languages "Back to languages")</small>
 
 <a id="php"></a>
-### PHP · [`cliHelpLine.php`](examples/cliHelpLine.php)
+### PHP
 ```php
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (array_intersect($argv ?? [], ['--help', '-h', '/?'])) { foreach (file(__FILE__) as $i => $l) { if ($i === 0 && (str_starts_with($l, '#!') || str_starts_with($l, '<?php'))) continue; if (str_starts_with($l, '////')) break; if (str_starts_with($l, '//') || trim($l) !== '') echo preg_replace('/^\/\/ ?/', '', $l); } exit(0); }
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.php`](examples/cliHelpLine.php) · [↑](#languages "Back to languages")</small>
 
 <a id="powershell"></a>
-### PowerShell · [`cliHelpLine.ps1`](examples/cliHelpLine.ps1)
+### PowerShell
 ```powershell
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if ($args | Where-Object { $_ -in '--help','-h','/?' }) { $i=0; Get-Content $MyInvocation.MyCommand.Path | ForEach-Object { $i++; if ($i -eq 1 -and $_ -match '^#!') { return }; if ($_ -match '^##') { break } elseif ($_ -match '^#' -or $_.Trim() -ne '') { $_ -replace '^# ?','' } }; exit 0 }
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.ps1`](examples/cliHelpLine.ps1) · [↑](#languages "Back to languages")</small>
 
 <a id="python"></a>
-### Python · [`cliHelpLine.py`](examples/cliHelpLine.py)
+### Python
 ```python
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 import sys, re; [print(re.sub(r'^# ?', '', line.rstrip('\r\n')) if line.startswith('#') else line.rstrip('\r\n')) for line in open(__file__, encoding='utf-8') if not line.startswith('#!') and (not line.startswith('##') or sys.exit(0)) and (line.startswith('#') or line.strip())] if any(arg in sys.argv for arg in ('--help', '-h', '/?')) else None  # noqa
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.py`](examples/cliHelpLine.py) · [↑](#languages "Back to languages")</small>
 
 <a id="r"></a>
-### R · [`cliHelpLine.r`](examples/cliHelpLine.r)
+### R
 ```r
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (any(commandArgs(trailingOnly=FALSE) %in% c("--help", "-h", "/?"))) { l <- readLines(sub("^--file=", "", grep("^--file=", commandArgs(trailingOnly=FALSE), value=TRUE)[1]), warn=FALSE); for (x in l[-1]) { if (startsWith(x, "##")) break; if (startsWith(x, "#") || nzchar(trimws(x))) cat(sub("^# ?", "", x), "\n", sep=""); }; quit(save="no", status=0); }
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.r`](examples/cliHelpLine.r) · [↑](#languages "Back to languages")</small>
 
 <a id="ruby"></a>
-### Ruby · [`cliHelpLine.rb`](examples/cliHelpLine.rb)
+### Ruby
 ```ruby
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if ARGV.any? { |a| %w[--help -h /?].include?(a) }; File.foreach(__FILE__).with_index { |l, i| next if i == 0 && l.start_with?('#!'); break if l.start_with?('##'); puts l.sub(/^# ?/, '').chomp if l.start_with?('#') || !l.strip.empty? }; exit 0; end
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.rb`](examples/cliHelpLine.rb) · [↑](#languages "Back to languages")</small>
 
 <a id="sh"></a>
-### Sh (POSIX Shell) · [`cliHelpLine.sh`](examples/cliHelpLine.sh)
+### Sh (POSIX Shell)
 ```sh
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.sh`](examples/cliHelpLine.sh) · [↑](#languages "Back to languages")</small>
 
 <a id="swift"></a>
-### Swift · [`cliHelpLine.swift`](examples/cliHelpLine.swift)
+### Swift
 ```swift
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 import Foundation; if CommandLine.arguments.contains(where: { ["--help", "-h", "/?"].contains($0) }) { for line in (try? String(contentsOfFile: #file, encoding: .utf8))?.components(separatedBy: .newlines) ?? [] { if line.hasPrefix("#!") { continue }; if line.hasPrefix("////") { exit(0) }; if line.hasPrefix("//") { print(line.dropFirst(line.hasPrefix("// ") ? 3 : 2)) } else if !line.trimmingCharacters(in: .whitespaces).isEmpty { print(line) } }; exit(0) }
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.swift`](examples/cliHelpLine.swift) · [↑](#languages "Back to languages")</small>
 
 <a id="tcl"></a>
-### Tcl · [`cliHelpLine.tcl`](examples/cliHelpLine.tcl)
+### Tcl
 ```tcl
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if {[expr {[lsearch -exact $argv "--help"] >= 0 || [lsearch -exact $argv "-h"] >= 0 || [lsearch -exact $argv "/?"] >= 0}]} { set fp [open $argv0 r]; set nr 0; while {[gets $fp line] >= 0} { incr nr; if {$nr == 1 && [string match "#!*" $line]} continue; if {[string match "##*" $line]} break; if {[string match "#*" $line] || [string trim $line] ne ""} { puts [regsub {^# ?} $line ""] } }; close $fp; exit 0 }
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.tcl`](examples/cliHelpLine.tcl) · [↑](#languages "Back to languages")</small>
 
 <a id="typescript"></a>
-### TypeScript · [`cliHelpLine.ts`](examples/cliHelpLine.ts)
+### TypeScript
 ```typescript
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (process.argv.some((arg: string) => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every((line: string) => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
@@ -191,15 +191,15 @@ if (process.argv.some((arg: string) => ['--help', '-h', '/?'].includes(arg))) { 
 > - <small>**[tsx](https://github.com/privatenumber/tsx):** Use shebang `#!/usr/bin/env -S npx tsx` or run `npx tsx script.ts`</small>
 > - <small>**[Deno](https://deno.com):** Use shebang `#!/usr/bin/env -S deno run --allow-read` or run `deno run --allow-read script.ts`</small>
 
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.ts`](examples/cliHelpLine.ts) · [↑](#languages "Back to languages")</small>
 
 <a id="zsh"></a>
-### Zsh · [`cliHelpLine.zsh`](examples/cliHelpLine.zsh)
+### Zsh
 ```zsh
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 ```
-[↑](#languages "Back to languages")
+<small>[`cliHelpLine.zsh`](examples/cliHelpLine.zsh) · [↑](#languages "Back to languages")</small>
 
 
 ## How It Works & FAQ
