@@ -1,30 +1,11 @@
 # cliHelpLine
 
-Turn your script's header comments into `--help`, `-h`, and `/?` output with a 2-line snippet. Inspired by MATLAB's comment-based help.  
+> Turn your script's header comments into `--help`, `-h`, and `/?` output with a 2-line snippet. Inspired by MATLAB's comment-based help—zero dependencies, zero boilerplate, and cross-platform.
 
-Zero dependencies, zero boilerplate, and cross-platform.       
+<!-- Optional: Demo GIF can be embedded here -->
+<!-- ![cliHelpLine Demo](demo.gif) -->
 
-## Overview
-
-`cliHelpLine` is a lightweight utility designed to automatically extract and display help documentation directly from your script's header comments. Instead of writing boilerplate argument-parsing code for every small script, you can simply write your documentation as comments at the top of your file, and `cliHelpLine` will fetch and format it whenever a user requests help.
-
-## Features
-
-- **No Boilerplate:** Say goodbye to complex argument parsing libraries for simple scripts.
-- **Single Source of Truth:** Your documentation lives inside the code comments at the very top of the file.
-- **Multi-language Support:** Works seamlessly across Bash, Sh, Zsh, Fish, Python, JavaScript (Node.js), Ruby, Perl, PHP, Lua, R, PowerShell, Tcl, and AWK.
-
-## Write your header as a comment
-
-- Write a header with comment characters from the specific language at the first character of each row.
-  
-  Example: `# bla bla` (bash, python, ...)
-  
-  Example: `// bla bla` (javascript, php, ...)
-
-- Paste the code (below) after your commented header. 
-
-## Example
+## Quick Example
 
 1. In your script (e.g. `backup.sh`), write your header comments followed by the 2-line snippet:
 
@@ -53,19 +34,17 @@ backup.sh - Quick directory backup tool
 Usage: ./backup.sh <source> <target>
 ```
 
-## FAQ
-- Shebangs (such as `#!/bin/bash`) are allowed, and will be ignored in help text.
+## Features
 
-- Empty lines are ignored
+- **Zero Boilerplate:** Say goodbye to complex argument parsing libraries just to print a help message.
+- **Single Source of Truth:** Your documentation lives inside the code comments at the very top of your file.
+- **Cross-Platform:** Works out-of-the-box with Unix `--help` and `-h`, as well as Windows `/?`.
+- **Compatible with Further Argument Parsing:** Only intercepts help requests; silently falls through for normal runs so you can still parse other arguments as usual.
+- **Multi-Language:** Works seamlessly across 14 scripting languages.
 
-- Stops reading header at double-comment (##, ////, etc depending on language).  Already in code below if you include both rows.
-
-- **Compatible with subsequent argument parsing:** `cliHelpLine` only intercepts execution when a help flag (`--help`, `-h`, or `/?`) is passed, printing the header and exiting (`exit 0`). For normal execution without help flags, it silently falls through, so you can freely perform any further argument parsing (manual or using libraries like `argparse`, `getopts`, `yargs`, etc.) right after it.
-
-  
 ## Code to use
 
-Copy and paste the following code for your language after the header
+Copy and paste the two lines corresponding to your programming language right after your header comment:
 
 ### Bash
 ```bash
@@ -151,33 +130,38 @@ if {[expr {[lsearch -exact $argv "--help"] >= 0 || [lsearch -exact $argv "-h"] >
 BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO["argv"]) if (PROCINFO["argv"][a] ~ /^-[fE]$/) f=PROCINFO["argv"][a+1]; while ((getline l < f) > 0) { if (++nr == 1 && l ~ /^#!/ ) continue; if (l ~ /^##/) break; if (l ~ /^#/ || l ~ /\S/) { sub(/^# ?/, "", l); print l } } exit 0 } }
 ```
 
-## Learn more
+## How It Works & FAQ
 
-To use this utility in your own projects, ***you only need to copy the two rows*** corresponding 
-to your programming language from the examples above. The copied rows should be pasted after the comment section of your file.
+- **Multi-line header comments:** Write your documentation as a block of comment lines at the top of your script. Each row of the header must start with the language's comment character (`#`, `//`, or `--`) at column 0.
+- **Double-comment delimiter:** The snippet stops reading when it hits the double-comment marker (`##`, `////`, `----`), which acts as the boundary.
+- **Shebangs are ignored:** If line 1 contains a shebang (`#!/bin/bash`, `#!/usr/bin/env python`, etc.), it is automatically skipped in the help output.
+- **Empty lines & paragraph spacing:** Completely blank lines without any comment characters are ignored. Lines that contain only a comment character (such as `#`, `//`, or `--`, with or without a trailing space) are preserved as empty blank lines in the output, allowing clean paragraph separation.
+- **Subsequent argument parsing:** `cliHelpLine` only intercepts execution when `--help`, `-h`, or `/?` is passed, printing the header and exiting (`exit 0`). For normal runs, it silently falls through, so you can freely perform any further argument parsing right after it.
 
-Please give the cliHelpLine project a star if you use it.
+## Testing & Local Development
 
-I you want to see how the scripts work, or test and run the included example scripts locally, you can clone the full repository:
+You can clone the repository to test and run the included example scripts:
 
 ```bash
 git clone https://github.com/JanAxelsson/cliHelpLine
 cd cliHelpLine
 ```
 
-To run the test suite across all languages using Docker:
+A multi-language Docker test suite is included to verify all 14 languages without having to install runtimes locally:
 
 ```bash
 ./run_tests.sh               # Run all tests (auto-starts Docker & builds image if needed)
 ./run_tests.sh python        # Run test for a specific language (or e.g. py, cliHelpLine.py)
 ./run_tests.sh py rb fish    # Run tests for multiple specific targets
 ./run_tests.sh --build       # Force rebuild the Docker test image
-./run_tests.sh --help        # Show all options and usage
+./run_tests.sh --help        # Show all test runner options
 ```
 
-## Develop
+Please give the cliHelpLine project a star ⭐ on GitHub if you find it useful!
 
-If you want to add more languages please send a pull request, or make an issue
+## Contributing
+
+If you want to add support for another scripting language, feel free to open an issue or send a pull request!
 
 ## License
 
