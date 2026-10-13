@@ -1,6 +1,6 @@
 # AGENTS.md - Developer & Agent Guide for cliHelpLine
 
-This document provides essential context, architectural decisions, design rules, and testing requirements for AI agents and human contributors working on **cliHelpLine**.
+This document provides essential context, architectural decisions, design rules, testing requirements, branching strategies, and release procedures for AI agents and human contributors working on **cliHelpLine**.
 
 ---
 
@@ -21,27 +21,27 @@ This document provides essential context, architectural decisions, design rules,
 
 ## 2. Supported Languages (17 Total)
 
-All 17 language examples live in the `examples/` directory:
+All 17 language examples live in the `examples/` directory and are organized alphabetically (A–Z):
 
 | Language | Script File | Comment Char | Boundary Marker (Double-Comment) | Runtime / Notes |
 | :--- | :--- | :--- | :--- | :--- |
+| **AWK** | `examples/cliHelpLine.awk` | `#` | `##` | `gawk` (GNU Awk required via shebang `-E`) |
 | **Bash** | `examples/cliHelpLine.bash` | `#` | `##` | `bash` |
-| **POSIX Shell** | `examples/cliHelpLine.sh` | `#` | `##` | `sh` (POSIX compliant) |
-| **Zsh** | `examples/cliHelpLine.zsh` | `#` | `##` | `zsh` |
 | **Fish** | `examples/cliHelpLine.fish` | `#` | `##` | `fish` |
-| **Python** | `examples/cliHelpLine.py` | `#` | `##` | `python3` (`sys.argv`, `__file__`) |
 | **JavaScript** | `examples/cliHelpLine.js` | `//` | `////` | `node` (`process.argv`, `__filename`) |
-| **TypeScript** | `examples/cliHelpLine.ts` | `//` | `////` | `tsx` / `bun` / `deno` / `node` |
-| **Ruby** | `examples/cliHelpLine.rb` | `#` | `##` | `ruby` (`ARGV`, `__FILE__`) |
+| **Julia** | `examples/cliHelpLine.jl` | `#` | `##` | `julia` (`ARGS`, `@__FILE__`) |
+| **Lua** | `examples/cliHelpLine.lua` | `--` | `----` | `lua` (`arg`, `arg[0]`) |
 | **Perl** | `examples/cliHelpLine.pl` | `#` | `##` | `perl` (`@ARGV`, `$0`) |
 | **PHP** | `examples/cliHelpLine.php` | `//` | `////` | `php` (`$argv`, `__FILE__`) |
-| **Lua** | `examples/cliHelpLine.lua` | `--` | `----` | `lua` (`arg`, `arg[0]`) |
-| **R** | `examples/cliHelpLine.r` | `#` | `##` | `Rscript` (`commandArgs`) |
 | **PowerShell** | `examples/cliHelpLine.ps1` | `#` | `##` | `pwsh` (`$args`, `$MyInvocation`) |
-| **Tcl** | `examples/cliHelpLine.tcl` | `#` | `##` | `tclsh` (`$argv`, `$argv0`) |
-| **AWK** | `examples/cliHelpLine.awk` | `#` | `##` | `gawk` (GNU Awk required) |
-| **Julia** | `examples/cliHelpLine.jl` | `#` | `##` | `julia` (`ARGS`, `@__FILE__`) |
+| **Python** | `examples/cliHelpLine.py` | `#` | `##` | `python3` (`sys.argv`, `__file__`) |
+| **R** | `examples/cliHelpLine.r` | `#` | `##` | `Rscript` (`commandArgs`) |
+| **Ruby** | `examples/cliHelpLine.rb` | `#` | `##` | `ruby` (`ARGV`, `__FILE__`) |
+| **Sh (POSIX Shell)** | `examples/cliHelpLine.sh` | `#` | `##` | `sh` (POSIX compliant, sorted under S) |
 | **Swift** | `examples/cliHelpLine.swift` | `//` | `////` | `swift` (`CommandLine`, `#file`) |
+| **Tcl** | `examples/cliHelpLine.tcl` | `#` | `##` | `tclsh` (`$argv`, `$argv0`) |
+| **TypeScript** | `examples/cliHelpLine.ts` | `//` | `////` | `bun` / `node 22.6+` / `tsx` / `deno` |
+| **Zsh** | `examples/cliHelpLine.zsh` | `#` | `##` | `zsh` |
 
 ---
 
@@ -74,8 +74,26 @@ Standard BSD/macOS `awk` lacks process introspection (`PROCINFO`) and intercepts
 ### D. Ruby on macOS Sandbox
 Ruby on macOS can throw `Errno::EPERM` when scanning `~/.gem`. Always pass `RUBYOPT="--disable-gems"` or `ruby --disable-gems` in tests.
 
-### E. README Synchronization
-Test 3 verifies that each script's 2-line snippet matches the corresponding code block in `README.md` byte-for-byte. If you change a snippet in a script, you MUST update `README.md`, and vice versa.
+### E. Non-Interactive CLI Input Handling
+When invoking command-line runners in test scripts (especially `npx tsx`), always redirect standard input from `/dev/null` (`< /dev/null`). This prevents interactive prompts (like package installation confirmations or package update notices) from hanging the test suite indefinitely.
+
+### F. README Structure & Navigation Rules
+1. **Alphabetical Ordering:**
+   All 17 language sections in `README.md` under `## Code to use` must be sorted strictly alphabetically from A to Z (with `Sh (POSIX Shell)` positioned under **S** between `Ruby` and `Swift`).
+2. **Quick-Jump Index Bar:**
+   Located at `<a id="languages"></a>` directly beneath `## Code to use`. Contains clean links to each language anchor:
+   `> [AWK](#awk) · [Bash](#bash) · ... · [Zsh](#zsh)`
+3. **Explicit HTML Anchors:**
+   Place `<a id="<lang>"></a>` directly above each `### <LanguageName>` heading. This guarantees navigation works consistently regardless of Markdown engine slugification.
+4. **Clean Headings:**
+   Keep headings clean text without large inline URLs or hyperlinks (e.g. `### Bash`, NOT `### Bash · [link](...)`).
+5. **Compact Footers with Up-Arrow Return:**
+   Immediately following each code block (or following any language-specific tip block), include a single `<small>` footer combining the example link and an up-arrow return to the index:
+   ```markdown
+   <small>[`cliHelpLine.<ext>`](examples/cliHelpLine.<ext>) · [↑](#languages "Back to languages")</small>
+   ```
+6. **Byte-for-Byte Synchronization:**
+   Test 3 extracts the 2-line code blocks from `README.md` and verifies that they match the respective files in `examples/` byte-for-byte.
 
 ---
 
@@ -83,15 +101,15 @@ Test 3 verifies that each script's 2-line snippet matches the corresponding code
 
 The test suite is orchestrated by [`run_tests.sh`](file:///Users/jan/Documents/Projects/cliHelpLine/run_tests.sh), which invokes [`tests/test_cliHelpLine.sh`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_cliHelpLine.sh):
 
-```
+```text
                      ./run_tests.sh
                            │
        ┌───────────────────┼───────────────────┐
        ▼                   ▼                   ▼
 Stage 1: Local Host   Stage 2: Docker     Stage 3: README
-(Verifies installed   (Verifies all 14    (Synchronizes
- local runtimes)       runtimes in slim    2-line snippet
-                       container)          against README)
+(Verifies installed   (Verifies all 16    (Synchronizes
+ local runtimes)       Linux runtimes in   2-line snippets
+                       slim container)     against README)
 ```
 
 ### What Each Script Test Checks:
@@ -99,9 +117,9 @@ Stage 1: Local Host   Stage 2: Docker     Stage 3: README
 2. **Normal Execution Verification:** Invokes script without arguments. Verifies output falls through cleanly to main code and prints `"Hello world!"` (and NOT the help text).
 
 ### Summary Stages:
-- **Test 1/3: Local host tests:** Verifies `--help` and running without `--help` on macOS/Linux. Missing host runtimes are gracefully reported in quiet text underneath.
-- **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where all Linux runtimes are installed.
-- **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 17 languages.
+- **Test 1/3: Local host tests:** Verifies `--help` and running without `--help` on macOS/Linux. Missing host runtimes are quietly collected and reported underneath (`Skipped: <ext> (<runtime> not found)`) so that test logs remain clean with only `[ OK ]` or `[FAIL]`.
+- **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where 16 Linux runtimes (including Julia 1.10.12 and tsx/bun/node) are installed. Swift is skipped on Linux and verified on macOS.
+- **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 17 languages byte-for-byte.
 
 ### Continuous Integration (GitHub Actions - 3 Platforms):
 Automated CI runs on every push and pull request across all branches via `.github/workflows/tests.yml`.
@@ -128,14 +146,14 @@ Automated CI runs on every push and pull request across all branches via `.githu
 #### The 4 Jobs Explained:
 1. **`test-docker-and-readme` (Linux `ubuntu-latest`):**
    - **Docker Buildx Cache:** Uses GitHub Actions cache (`type=gha`) to cache the `clihelpline-tester` Docker image layers, speeding up builds to seconds.
-   - **Stage 1 (Docker Full Suite):** Runs `tests/test_cliHelpLine.sh --help-only` inside the Docker container, testing all 14 runtimes for both `--help` output and normal execution (`"Hello world!"`).
-   - **Stage 2 (README Sync):** Runs `tests/test_cliHelpLine.sh --readme-only` on the host, verifying all 14 language snippets against `README.md` byte-for-byte.
+   - **Stage 1 (Docker Full Suite):** Runs `tests/test_cliHelpLine.sh --help-only` inside the Docker container, testing all 16 Linux runtimes for both `--help` output and normal execution (`"Hello world!"`).
+   - **Stage 2 (README Sync):** Runs `tests/test_cliHelpLine.sh --readme-only` on the host, verifying all 17 language snippets against `README.md` byte-for-byte.
    - **Output Passing:** Emits stripped text results directly to job outputs (`$GITHUB_OUTPUT`) in memory without creating fragile blob zip artifacts.
 
 2. **`test-macos` (macOS `macos-latest`):**
    - **Native Darwin Runner:** Executes on Apple Silicon (M-series) macOS hardware.
-   - **Homebrew Setup:** Installs `gawk`, `fish`, `lua`, `php`, and `r` via Homebrew (`pwsh`, `python3`, `node`, `ruby`, `perl`, `bash`, `zsh` are pre-installed).
-   - **Stage 3 (macOS Native Tests):** Runs `tests/test_cliHelpLine.sh --help-only` directly on Darwin, guaranteeing BSD `sed`, `gawk`, and macOS permission compatibility. Does **not** re-run README sync (avoids test duplication).
+   - **Homebrew Setup:** Installs `gawk`, `fish`, `lua`, `php`, and `r` via Homebrew (`pwsh`, `python3`, `node`, `ruby`, `perl`, `bash`, `zsh`, `swift` are native/pre-installed).
+   - **Stage 3 (macOS Native Tests):** Runs `tests/test_cliHelpLine.sh --help-only` directly on Darwin, guaranteeing BSD `sed`, `gawk`, Swift, and macOS permission compatibility. Does **not** re-run README sync (avoids test duplication).
    - **Output Passing:** Emits results to `$GITHUB_OUTPUT`.
 
 3. **`test-windows` (Windows `windows-latest`):**
@@ -149,11 +167,11 @@ Automated CI runs on every push and pull request across all branches via `.githu
    - Receives the 4 stage outputs via environment variables and executes [`tests/format_summary.sh`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/format_summary.sh).
    - **Zero Console Clutter:** Suppresses bash execution tracing so that opening the job log displays only pristine, formatted output.
    - **Front-Page Step Summary:** Writes Markdown directly to `$GITHUB_STEP_SUMMARY`, rendering all 4 stages in exact requested order on the GitHub Actions run homepage:
-     1. 🐧 Docker Tests (All 14 Languages)
-     2. 📖 Sync with README.md
+     1. 🐧 Docker Tests (All Linux Languages)
+     2. 📖 Sync with README.md (All 17 Languages)
      3. 🍏 macOS Tests (Darwin Host)
      4. 🪟 Windows Tests (Native Host)
-     5. 🏆 Total Test Summary (All 54 tests)
+     5. 🏆 Total Test Summary
    - Evaluates prerequisite job statuses and exits with code 1 if any stage experienced a failure.
 
 ---
@@ -188,7 +206,7 @@ Automated CI runs on every push and pull request across all branches via `.githu
 
 ## 6. Checklist: How to Add a New Language
 
-When adding language #15:
+When adding language #18+:
 1. **Create `examples/cliHelpLine.<ext>`:**
    - Shebang (if applicable).
    - Multi-line header documentation.
@@ -197,13 +215,80 @@ When adding language #15:
    - Code explanation in comments.
    - Runnable code block printing `"Hello world!"`.
 2. **Update `README.md`:**
-   - Add a `### <LanguageName>` section under `## Code to use` with the exact 2-line block.
-   - Update language count mentions if necessary.
+   - Add language link to the alphabetical jump bar under `## Code to use`.
+   - Add `<a id="<lang>"></a>` and `### <LanguageName>` in alphabetical position.
+   - Add the exact 2-line code block in fenced syntax (```` ```<lang> ````).
+   - Add footer link: `<small>[`cliHelpLine.<ext>`](examples/cliHelpLine.<ext>) · [↑](#languages "Back to languages")</small>`.
+   - Update total language count in header / summary text if applicable.
 3. **Update `tests/test_cliHelpLine.sh`:**
    - Add extension mapping in `lang_for_file()`.
    - Add interpreter check in `is_interpreter_available()` and `get_interpreter_name()`.
    - Add execution command in `run_script()`.
 4. **Update `tests/Dockerfile`:**
-   - Add the interpreter package to `apt-get install`.
+   - Add interpreter package or binary installation to `apt-get install` or `/opt`.
 5. **Verify:**
-   - Run `./run_tests.sh --build` and ensure all 3 test stages pass.
+   - Run `./run_tests.sh --local` and `./run_tests.sh --docker` (or `./run_tests.sh --build`).
+   - Ensure all 3 test stages pass.
+
+---
+
+## 7. Branching Strategy & Git Workflow
+
+The repository follows a clean two-branch development model:
+
+### The Branches
+- **`develop` (Default Working Branch):**
+  - All new features, bug fixes, documentation enhancements, refactors, and updates to `AGENTS.md` are developed and committed directly on `develop`.
+  - CI workflows run on every push to `develop`.
+- **`main` (Production / Stable Release Branch):**
+  - Strictly reflects tagged, stable releases (`v0.1`, `v0.2`, etc.).
+  - Code is never modified directly on `main`; it is updated exclusively by merging `develop` during the release process.
+
+### How `AGENTS.md` Is Handled Across Branches
+- `AGENTS.md` is a version-controlled Git file tracked in the repository root.
+- **Always update `AGENTS.md` on `develop`:** Since everyday work happens on `develop`, keeping `AGENTS.md` updated here ensures that agents and human contributors always have access to the latest architectural guidelines, checklists, and lessons learned.
+- **Automatic propagation to `main`:** When `develop` is merged into `main` during a release, `main` automatically receives the exact updated version of `AGENTS.md`. No separate manual syncing or cherry-picking is required.
+
+---
+
+## 8. Release Process Playbook (Step-by-Step)
+
+Follow this exact procedure whenever cutting a new version (e.g. `v0.2` $\rightarrow$ `v0.3`):
+
+### Step 1: Bump the Version Badge in `README.md` (on `develop`)
+Line 4 of `README.md` contains the Shields.io version badge:
+```markdown
+[![Version](https://img.shields.io/badge/version-<X.Y>-blue.svg)](https://github.com/JanAxelsson/cliHelpLine/releases)
+```
+Update `<X.Y>` to the new version number (e.g. `0.3`), verify README sync (`bash tests/test_cliHelpLine.sh --readme-only`), and commit:
+```bash
+git add README.md
+git commit -m "chore: bump version badge to <X.Y> in README.md"
+git push origin develop
+```
+
+### Step 2: Merge `develop` into `main`
+Switch to `main` and fast-forward merge the verified `develop` branch:
+```bash
+git checkout main
+git merge develop --ff-only
+```
+
+### Step 3: Create an Annotated Git Tag
+Create an annotated release tag documenting key additions:
+```bash
+git tag -a v<X.Y> -m "Release version <X.Y> - <Short summary of features/fixes>"
+```
+
+### Step 4: Push `main` and the Tag to GitHub
+```bash
+git push origin main
+git push origin v<X.Y>
+```
+*Pushing the tag automatically registers the release on GitHub under Releases & Tags.*
+
+### Step 5: Switch Back to `develop`
+Always return to `develop` so subsequent development work continues on the working branch:
+```bash
+git checkout develop
+```
