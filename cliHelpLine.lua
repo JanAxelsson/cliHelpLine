@@ -14,7 +14,7 @@
 --
 -- ... more help text ...
 
----- Help -- print file header until '----'  (see https://github.com/JanAxelsson/cliHelpLine)
+---- Help -- prints header above (stops at '----')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (function(args) for _,a in ipairs(args) do if a=="--help" or a=="-h" or a=="/?" then return true end end return false end)(arg or {}) then local f=io.open(arg[0],"r"); local n=0; for l in f:lines() do n=n+1; if not (n==1 and l:match("^#!")) then if l:match("^%-%-%-%-") then break end if l:match("^%-%-") or l:match("%S") then print((l:gsub("^%-%- ?", ""))) end end end; os.exit(0); end
 
 

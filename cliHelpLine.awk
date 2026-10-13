@@ -14,7 +14,7 @@
 #
 # ... more help text ...
 
-## Help -- print file header until '##'  (see https://github.com/JanAxelsson/cliHelpLine)
+## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO["argv"]) if (PROCINFO["argv"][a] ~ /^-[fE]$/) f=PROCINFO["argv"][a+1]; while ((getline l < f) > 0) { if (++nr == 1 && l ~ /^#!/ ) continue; if (l ~ /^##/) break; if (l ~ /^#/ || l ~ /\S/) { sub(/^# ?/, "", l); print l } } exit 0 } }
 
 

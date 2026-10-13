@@ -14,7 +14,7 @@
 #
 # ... more help text ...
 
-## Help -- print file header until '##'  (see https://github.com/JanAxelsson/cliHelpLine)
+## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if ($args | Where-Object { $_ -in '--help','-h','/?' }) { $i=0; Get-Content $MyInvocation.MyCommand.Path | ForEach-Object { $i++; if ($i -eq 1 -and $_ -match '^#!') { return }; if ($_ -match '^##') { break } elseif ($_ -match '^#' -or $_.Trim() -ne '') { $_ -replace '^# ?','' } }; exit 0 }
 
 

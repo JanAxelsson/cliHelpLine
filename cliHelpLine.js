@@ -14,7 +14,7 @@
 //
 // ... more help text ...
 
-//// Help -- print file header until '////'  (see https://github.com/JanAxelsson/cliHelpLine)
+//// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every(line => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
 
 

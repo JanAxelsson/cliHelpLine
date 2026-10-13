@@ -14,7 +14,7 @@
 #
 # ... more help text ...
 
-## Help -- print file header until '##'  (see https://github.com/JanAxelsson/cliHelpLine)
+## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if contains -- "$argv[1]" --help -h '/?'; sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' (status filename) | sed '$d'; exit 0; end
 
 

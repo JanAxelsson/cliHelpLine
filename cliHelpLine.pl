@@ -14,7 +14,7 @@
 #
 # ... more help text ...
 
-## Help -- print file header until '##'  (see https://github.com/JanAxelsson/cliHelpLine)
+## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (grep { $_ eq '--help' || $_ eq '-h' || $_ eq '/?' } @ARGV) { open my $f, '<', $0; while (<$f>) { next if $. == 1 && /^#!/; last if /^##/; if (/^#/ || /\S/) { s/^# ?//; print; } } exit 0; }
 
 

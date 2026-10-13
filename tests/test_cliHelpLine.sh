@@ -209,10 +209,28 @@ show_side_by_side() {
 files=()
 if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
+        arg_clean="${arg#.}"
         if [ -f "$arg" ]; then
             files+=("$arg")
         elif [ -f "$PROJECT_ROOT/$arg" ]; then
             files+=("$PROJECT_ROOT/$arg")
+        elif [ -f "$PROJECT_ROOT/cliHelpLine.$arg_clean" ]; then
+            files+=("$PROJECT_ROOT/cliHelpLine.$arg_clean")
+        else
+            # Matcha mot språknamn (t.ex. 'python' -> cliHelpLine.py)
+            matched=""
+            for f in "$PROJECT_ROOT"/cliHelpLine.*; do
+                [ -f "$f" ] || continue
+                lang=$(lang_for_file "$f")
+                if [ "$lang" = "$arg" ]; then
+                    files+=("$f")
+                    matched=1
+                    break
+                fi
+            done
+            if [ -z "$matched" ]; then
+                echo "Varning: Hittade ingen testfil för '$arg'" >&2
+            fi
         fi
     done
 else

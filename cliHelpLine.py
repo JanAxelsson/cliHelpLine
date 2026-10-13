@@ -14,7 +14,7 @@
 #
 # ... more help text ...
 
-## Help -- print file header until '##'  (see https://github.com/JanAxelsson/cliHelpLine)
+## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 import sys, re; [print(re.sub(r'^# ?', '', line.rstrip('\r\n')) if line.startswith('#') else line.rstrip('\r\n')) for line in open(__file__, encoding='utf-8') if not line.startswith('#!') and (not line.startswith('##') or sys.exit(0)) and (line.startswith('#') or line.strip())] if any(arg in sys.argv for arg in ('--help', '-h', '/?')) else None  # noqa
 
 
