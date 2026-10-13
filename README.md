@@ -5,9 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **Turn your script's header comments into `--help`, `-h`, and `/?` output with a 2-line snippet.**  
-> Zero dependencies, zero boilerplate, and cross-platform across 14 scripting languages.
+> Zero dependencies, zero boilerplate, and cross-platform across 17 scripting languages.
 
-In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help is effortless: the comments at the top of a file automatically become the documentation. `cliHelpLine` brings that exact zero-overhead pattern to Bash, Python, Node.js, Ruby, and 10 other languages—no heavyweight CLI frameworks or argument-parsing libraries required.
+In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help is effortless: the comments at the top of a file automatically become the documentation. `cliHelpLine` brings that exact zero-overhead pattern to Bash, Python, Node.js, Ruby, TypeScript, Julia, Swift, and 10 other languages—no heavyweight CLI frameworks or argument-parsing libraries required.
 
 <!-- Optional: Demo GIF can be embedded here -->
 <!-- ![cliHelpLine Demo](demo.gif) -->
@@ -47,7 +47,7 @@ Usage: ./backup.sh <source> <target>
 - **Single Source of Truth:** Your documentation lives inside the code comments at the very top of your file.
 - **Cross-Platform:** Works out-of-the-box with Unix `--help` and `-h`, as well as Windows `/?`.
 - **Compatible with Further Argument Parsing:** Only intercepts help requests; silently falls through for normal runs so you can still parse other arguments as usual.
-- **Multi-Language:** Works seamlessly across 14 scripting languages.
+- **Multi-Language:** Works seamlessly across 17 scripting languages.
 
 ## Code to use
 
@@ -138,6 +138,24 @@ BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO
 ```
 > **Important:** Your script must use `#!/usr/bin/env -S gawk -E` on line 1 (the `-E` flag prevents AWK from intercepting `--help`, and `gawk` is required for `PROCINFO` so the script can locate its own file). On macOS, install via `brew install gawk`; on Linux, `gawk` is typically standard.
 
+### TypeScript
+```typescript
+//// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
+if (process.argv.some((arg: string) => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every((line: string) => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
+```
+
+### Julia
+```julia
+## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
+if any(in(["--help", "-h", "/?"]), ARGS); for l in eachline(@__FILE__); startswith(l, "#!") && continue; startswith(l, "##") && exit(0); (startswith(l, "#") || !isempty(strip(l))) && println(startswith(l, "#") ? replace(l, r"^# ?"=>"") : l); end; exit(0); end
+```
+
+### Swift
+```swift
+//// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
+import Foundation; if CommandLine.arguments.contains(where: { ["--help", "-h", "/?"].contains($0) }) { for line in (try? String(contentsOfFile: #file, encoding: .utf8))?.components(separatedBy: .newlines) ?? [] { if line.hasPrefix("#!") { continue }; if line.hasPrefix("////") { exit(0) }; if line.hasPrefix("//") { print(line.dropFirst(line.hasPrefix("// ") ? 3 : 2)) } else if !line.trimmingCharacters(in: .whitespaces).isEmpty { print(line) } }; exit(0) }
+```
+
 ## How It Works & FAQ
 
 - **Multi-line header comments:** Write your documentation as a block of comment lines at the top of your script. Each row of the header must start with the language's comment character (`#`, `//`, or `--`) at column 0.
@@ -160,7 +178,7 @@ A 3-stage multi-language test suite is included to thoroughly verify all scripts
 ```bash
 ./run_tests.sh               # Runs all 3 test stages:
                              #   1. Local host verification (Darwin/Linux)
-                             #   2. Docker full-suite verification (all 14 languages)
+                             #   2. Docker full-suite verification (all 17 languages)
                              #   3. README.md code snippet synchronization
 ./run_tests.sh --local, -l   # Run local test + README test only (skips Docker)
 ./run_tests.sh --docker, -d  # Run Docker test + README test only (skips local)

@@ -107,6 +107,16 @@ if ($nodeCmd -and (Test-Path $jsFile)) {
     }
 }
 
+# 4. Test TypeScript if available
+$tsCmd = Find-WorkingCommand @("tsx.cmd", "tsx", "bun.exe", "bun", "deno.exe", "deno", "ts-node.cmd", "ts-node")
+$tsFile = Join-Path $examplesDir "cliHelpLine.ts"
+if ($tsCmd -and (Test-Path $tsFile)) {
+    Test-ScriptHelpAndRun "cliHelpLine.ts" {
+        param($f)
+        if ($f) { & $tsCmd $tsFile $f } else { & $tsCmd $tsFile }
+    }
+}
+
 Write-Host ""
 if ($testsFailed -eq 0) {
     Write-Host "All tests passed ($testsPassed/$testsPassed)"

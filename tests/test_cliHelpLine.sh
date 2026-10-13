@@ -29,7 +29,7 @@ run_script() {
 
     # 1. Try direct execution if executable
     if [ -x "$target" ]; then
-        if output=$( RUBYOPT="--disable-gems" "$target" "$@" 2>/dev/null ); then
+        if output=$( RUBYOPT="--disable-gems" "$target" "$@" < /dev/null 2>/dev/null ); then
             printf "%s\n" "$output"
             return 0
         fi
@@ -91,6 +91,22 @@ run_script() {
                     awk -f "$target" 2>/dev/null
                 fi
             fi ;;
+        ts)
+            if command -v bun >/dev/null 2>&1 && output=$(bun run "$target" "$@" 2>/dev/null); then
+                printf "%s\n" "$output"
+            elif command -v tsx >/dev/null 2>&1 && output=$(tsx "$target" "$@" 2>/dev/null); then
+                printf "%s\n" "$output"
+            elif command -v deno >/dev/null 2>&1 && output=$(deno run --allow-read "$target" "$@" 2>/dev/null); then
+                printf "%s\n" "$output"
+            elif command -v ts-node >/dev/null 2>&1 && output=$(ts-node --transpile-only "$target" "$@" 2>/dev/null); then
+                printf "%s\n" "$output"
+            elif command -v node >/dev/null 2>&1 && output=$(node --experimental-strip-types "$target" "$@" 2>/dev/null); then
+                printf "%s\n" "$output"
+            fi ;;
+        jl)
+            julia "$target" "$@" 2>/dev/null ;;
+        swift)
+            swift -module-cache-path "${TMPDIR:-/tmp}/swift-cache" "$target" "$@" 2>/dev/null ;;
         *)
             "$target" "$@" 2>/dev/null ;;
     esac
@@ -115,6 +131,9 @@ is_interpreter_available() {
         ps1)  command -v pwsh >/dev/null 2>&1 ;;
         tcl)  command -v tclsh >/dev/null 2>&1 ;;
         awk)  command -v gawk >/dev/null 2>&1 ;;
+        ts)   command -v bun >/dev/null 2>&1 || command -v tsx >/dev/null 2>&1 || command -v deno >/dev/null 2>&1 || command -v ts-node >/dev/null 2>&1 || (command -v node >/dev/null 2>&1 && node --experimental-strip-types -e 'process.exit(0)' >/dev/null 2>&1) ;;
+        jl)   command -v julia >/dev/null 2>&1 ;;
+        swift) command -v swift >/dev/null 2>&1 ;;
         *)    return 0 ;;
     esac
 }
@@ -136,6 +155,16 @@ get_interpreter_name() {
         ps1)        echo "pwsh" ;;
         tcl)        echo "tclsh" ;;
         awk)        echo "gawk" ;;
+        ts)
+            if command -v bun >/dev/null 2>&1; then echo "bun"
+            elif command -v tsx >/dev/null 2>&1; then echo "tsx"
+            elif command -v deno >/dev/null 2>&1; then echo "deno"
+            elif command -v ts-node >/dev/null 2>&1; then echo "ts-node"
+            else echo "bun/tsx/deno"
+            fi
+            ;;
+        jl)         echo "julia" ;;
+        swift)      echo "swift" ;;
         *)          echo "$ext" ;;
     esac
 }
@@ -158,6 +187,9 @@ lang_for_file() {
         ps1)        echo "powershell" ;;
         tcl)        echo "tcl" ;;
         awk)        echo "awk" ;;
+        ts)         echo "typescript" ;;
+        jl)         echo "julia" ;;
+        swift)      echo "swift" ;;
         *)          echo "$ext" ;;
     esac
 }

@@ -82,9 +82,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install macOS runtimes via Homebrew
+      - name: Install macOS runtimes via Homebrew & npm
         run: |
-          brew install gawk fish lua php r
+          brew install gawk fish lua php r julia
+          npm install -g tsx
 
       - name: Run native macOS tests
         id: step_macos
@@ -103,7 +104,7 @@ jobs:
           exit $EXIT_CODE
 
   # ============================================================
-  # 3. Windows Job: Native Windows tests (pwsh, py, js, /?)
+  # 3. Windows Job: Native Windows tests (pwsh, py, js, ts, /?)
   # ============================================================
   test-windows:
     name: Windows (Native Host)
@@ -114,6 +115,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install TypeScript runner
+        shell: pwsh
+        run: |
+          npm install -g tsx
 
       - name: Run native Windows test suite (pwsh)
         id: step_windows

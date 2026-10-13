@@ -19,9 +19,9 @@ This document provides essential context, architectural decisions, design rules,
 
 ---
 
-## 2. Supported Languages (14 Total)
+## 2. Supported Languages (17 Total)
 
-All 14 language examples live in the `examples/` directory:
+All 17 language examples live in the `examples/` directory:
 
 | Language | Script File | Comment Char | Boundary Marker (Double-Comment) | Runtime / Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -31,6 +31,7 @@ All 14 language examples live in the `examples/` directory:
 | **Fish** | `examples/cliHelpLine.fish` | `#` | `##` | `fish` |
 | **Python** | `examples/cliHelpLine.py` | `#` | `##` | `python3` (`sys.argv`, `__file__`) |
 | **JavaScript** | `examples/cliHelpLine.js` | `//` | `////` | `node` (`process.argv`, `__filename`) |
+| **TypeScript** | `examples/cliHelpLine.ts` | `//` | `////` | `tsx` / `bun` / `deno` / `node` |
 | **Ruby** | `examples/cliHelpLine.rb` | `#` | `##` | `ruby` (`ARGV`, `__FILE__`) |
 | **Perl** | `examples/cliHelpLine.pl` | `#` | `##` | `perl` (`@ARGV`, `$0`) |
 | **PHP** | `examples/cliHelpLine.php` | `//` | `////` | `php` (`$argv`, `__FILE__`) |
@@ -39,6 +40,8 @@ All 14 language examples live in the `examples/` directory:
 | **PowerShell** | `examples/cliHelpLine.ps1` | `#` | `##` | `pwsh` (`$args`, `$MyInvocation`) |
 | **Tcl** | `examples/cliHelpLine.tcl` | `#` | `##` | `tclsh` (`$argv`, `$argv0`) |
 | **AWK** | `examples/cliHelpLine.awk` | `#` | `##` | `gawk` (GNU Awk required) |
+| **Julia** | `examples/cliHelpLine.jl` | `#` | `##` | `julia` (`ARGS`, `@__FILE__`) |
+| **Swift** | `examples/cliHelpLine.swift` | `//` | `////` | `swift` (`CommandLine`, `#file`) |
 
 ---
 
