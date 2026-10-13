@@ -136,13 +136,18 @@ if {[expr {[lsearch -exact $argv "--help"] >= 0 || [lsearch -exact $argv "-h"] >
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO["argv"]) if (PROCINFO["argv"][a] ~ /^-[fE]$/) f=PROCINFO["argv"][a+1]; while ((getline l < f) > 0) { if (++nr == 1 && l ~ /^#!/ ) continue; if (l ~ /^##/) break; if (l ~ /^#/ || l ~ /\S/) { sub(/^# ?/, "", l); print l } } exit 0 } }
 ```
-> **Important:** Your script must use `#!/usr/bin/env -S gawk -E` on line 1 (the `-E` flag prevents AWK from intercepting `--help`, and `gawk` is required for `PROCINFO` so the script can locate its own file). On macOS, install via `brew install gawk`; on Linux, `gawk` is typically standard.
+> <small>**Important:** Your script must use `#!/usr/bin/env -S gawk -E` on line 1 (the `-E` flag prevents AWK from intercepting `--help`, and `gawk` is required for `PROCINFO` so the script can locate its own file). On macOS, install via `brew install gawk`; on Linux, `gawk` is typically standard.</small>
 
 ### TypeScript
 ```typescript
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (process.argv.some((arg: string) => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every((line: string) => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
 ```
+> <small>**Tip:** You can run TypeScript scripts directly without a build step:</small>
+> - <small>**[Bun](https://bun.sh):** Use shebang `#!/usr/bin/env bun` or run `bun script.ts`</small>
+> - <small>**Node.js (23.6+):** Use shebang `#!/usr/bin/env node` or run `node script.ts` *(or `node --experimental-strip-types script.ts` on Node 22.6+)*</small>
+> - <small>**[tsx](https://github.com/privatenumber/tsx):** Use shebang `#!/usr/bin/env -S npx tsx` or run `npx tsx script.ts`</small>
+> - <small>**[Deno](https://deno.com):** Use shebang `#!/usr/bin/env -S deno run --allow-read` or run `deno run --allow-read script.ts`</small>
 
 ### Julia
 ```julia
