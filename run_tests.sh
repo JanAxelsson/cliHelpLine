@@ -16,6 +16,7 @@
 #                                #   ./run_tests.sh py
 #                                #   ./run_tests.sh python
 #                                #   ./run_tests.sh bash zsh fish
+#   ./run_tests.sh --local, -l   # Run tests locally on host system (skips missing interpreters)
 #   ./run_tests.sh --build       # Force rebuild the Docker test image, then run tests
 #   ./run_tests.sh --help        # Show this help text
 #   ./run_tests.sh -h            # Show this help text
@@ -23,14 +24,15 @@
 #
 # Requirements & Docker:
 #
-#   - Requires Docker (Docker Desktop, Colima, OrbStack, or native Linux daemon).
+#   - Full test suite runs in Docker (all 14 runtimes pre-configured).
+#   - Running with '--local' or '-l' executes directly on the host machine without Docker.
 #   - If Docker is not currently running, this script will attempt to start it
 #     automatically (macOS, Linux, WSL, Windows).
 #   - You do NOT need to build the Docker image beforehand; it is automatically
 #     built on the first run. Use '--build' to force a rebuild after modifying tests.
 
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
-if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 
 set -euo pipefail
 
@@ -106,12 +108,36 @@ ensure_docker_running() {
     echo " Klart!"
 }
 
+# Parse command line flags
+RUN_LOCAL=0
+REBUILD=0
+ARGS=()
+for arg in "$@"; do
+    if [ "$arg" = "--local" ] || [ "$arg" = "-l" ]; then
+        RUN_LOCAL=1
+    elif [ "$arg" = "--build" ]; then
+        REBUILD=1
+    else
+        ARGS+=("$arg")
+    fi
+done
+
+# If --local is requested, run directly on host without Docker
+if [ "$RUN_LOCAL" -eq 1 ]; then
+    echo "=== Kör tester lokalt på värdsystemet ($(uname -s)) ==="
+    if [ "${#ARGS[@]}" -gt 0 ]; then
+        bash "$PROJECT_ROOT/tests/test_cliHelpLine.sh" "${ARGS[@]}"
+    else
+        bash "$PROJECT_ROOT/tests/test_cliHelpLine.sh"
+    fi
+    exit $?
+fi
+
 ensure_docker_running
 
-# Build image if it doesn't exist or if --build is passed
-if [ "${1:-}" = "--build" ] || ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
+# Build image if it doesn't exist or if --build was passed
+if [ "$REBUILD" -eq 1 ] || ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
     echo "=== Bygger Docker-avbild ($IMAGE_NAME) ==="
-    [ "${1:-}" = "--build" ] && shift
     docker build -t "$IMAGE_NAME" -f "$DOCKERFILE_PATH" "$PROJECT_ROOT"
 fi
 
@@ -122,8 +148,16 @@ if [ -t 0 ] && [ -t 1 ]; then
 fi
 
 echo "=== Kör tester inuti Docker ($IMAGE_NAME) ==="
-docker run --rm $INTERACTIVE_FLAG \
-    -v "$PROJECT_ROOT:/workspace" \
-    -w /workspace \
-    "$IMAGE_NAME" \
-    bash tests/test_cliHelpLine.sh "$@"
+if [ "${#ARGS[@]}" -gt 0 ]; then
+    docker run --rm $INTERACTIVE_FLAG \
+        -v "$PROJECT_ROOT:/workspace" \
+        -w /workspace \
+        "$IMAGE_NAME" \
+        bash tests/test_cliHelpLine.sh "${ARGS[@]}"
+else
+    docker run --rm $INTERACTIVE_FLAG \
+        -v "$PROJECT_ROOT:/workspace" \
+        -w /workspace \
+        "$IMAGE_NAME" \
+        bash tests/test_cliHelpLine.sh
+fi

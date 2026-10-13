@@ -13,6 +13,7 @@ set -u
 # Färger
 GREEN="\033[0;32m"
 RED="\033[0;31m"
+YELLOW="\033[0;33m"
 RESET="\033[0m"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,7 +29,7 @@ run_script_help() {
 
     # 1. Försök att köra direkt om filen är körbar
     if [ -x "$target" ]; then
-        if output=$( "$target" "$help_flag" 2>/dev/null ); then
+        if output=$( RUBYOPT="--disable-gems" "$target" "$help_flag" 2>/dev/null ); then
             printf "%s\n" "$output"
             return 0
         fi
@@ -63,7 +64,7 @@ run_script_help() {
                 /opt/homebrew/bin/node "$target" "$help_flag" 2>/dev/null
             fi ;;
         rb)
-            ruby "$target" "$help_flag" 2>/dev/null ;;
+            RUBYOPT="--disable-gems" ruby --disable-gems "$target" "$help_flag" 2>/dev/null ;;
         pl)
             perl "$target" "$help_flag" 2>/dev/null ;;
         php)
@@ -77,9 +78,57 @@ run_script_help() {
         tcl)
             tclsh "$target" "$help_flag" 2>/dev/null ;;
         awk)
-            awk -f "$target" -- "$help_flag" 2>/dev/null ;;
+            if command -v gawk >/dev/null 2>&1; then
+                gawk -f "$target" -- "$help_flag" 2>/dev/null
+            elif command -v awk >/dev/null 2>&1; then
+                awk -f "$target" -- "$help_flag" 2>/dev/null
+            fi ;;
         *)
             "$target" "$help_flag" 2>/dev/null ;;
+    esac
+}
+
+# Kontrollera om nödvändig tolk finns tillgänglig i systemet
+is_interpreter_available() {
+    local target="$1"
+    local ext="${target##*.}"
+    case "$ext" in
+        bash) command -v bash >/dev/null 2>&1 ;;
+        sh)   command -v sh >/dev/null 2>&1 ;;
+        zsh)  command -v zsh >/dev/null 2>&1 ;;
+        fish) command -v fish >/dev/null 2>&1 ;;
+        py)   command -v python3 >/dev/null 2>&1 || command -v python >/dev/null 2>&1 ;;
+        js|mjs|cjs) command -v node >/dev/null 2>&1 ;;
+        rb)   command -v ruby >/dev/null 2>&1 ;;
+        pl)   command -v perl >/dev/null 2>&1 ;;
+        php)  command -v php >/dev/null 2>&1 ;;
+        lua)  command -v lua >/dev/null 2>&1 || command -v lua5.4 >/dev/null 2>&1 ;;
+        r|R)  command -v Rscript >/dev/null 2>&1 ;;
+        ps1)  command -v pwsh >/dev/null 2>&1 ;;
+        tcl)  command -v tclsh >/dev/null 2>&1 ;;
+        awk)  command -v gawk >/dev/null 2>&1 ;;
+        *)    return 0 ;;
+    esac
+}
+
+get_interpreter_name() {
+    local ext="${1##*.}"
+    case "$ext" in
+        bash)       echo "bash" ;;
+        sh)         echo "sh" ;;
+        zsh)        echo "zsh" ;;
+        fish)       echo "fish" ;;
+        py)         echo "python3" ;;
+        js|mjs|cjs) echo "node" ;;
+        rb)         echo "ruby" ;;
+        pl)         echo "perl" ;;
+        php)        echo "php" ;;
+        lua)        echo "lua" ;;
+        r|R)        echo "Rscript" ;;
+        ps1)        echo "pwsh" ;;
+        tcl)        echo "tclsh" ;;
+        awk)        echo "gawk" ;;
+        *)          echo "$ext" ;;
     esac
 }
 
@@ -252,6 +301,7 @@ fi
 
 total_count=0
 fail_count=0
+skip_count=0
 
 expected_tmp=$(mktemp)
 actual_tmp=$(mktemp)
@@ -264,6 +314,13 @@ echo "--- Test 1: Verifierar header mot --help output ---"
 for target in "${files[@]}"; do
     total_count=$((total_count + 1))
     target_name="$(basename "$target")"
+
+    if ! is_interpreter_available "$target"; then
+        interp=$(get_interpreter_name "$target")
+        printf "${YELLOW}[SKIP]${RESET} %s ('%s' inte installerad)\n" "$target_name" "$interp"
+        skip_count=$((skip_count + 1))
+        continue
+    fi
 
     extract_expected_help "$target" > "$expected_tmp"
     run_script_help "$target" "--help" > "$actual_tmp"
@@ -312,9 +369,17 @@ fi
 
 echo ""
 if [ "$fail_count" -eq 0 ]; then
-    printf "${GREEN}Alla tester passerade ($total_count/$total_count)${RESET}\n"
+    if [ "$skip_count" -gt 0 ]; then
+        printf "${GREEN}Alla tillgängliga tester passerade ($((total_count - skip_count))/$total_count, $skip_count överhoppade)${RESET}\n"
+    else
+        printf "${GREEN}Alla tester passerade ($total_count/$total_count)${RESET}\n"
+    fi
     exit 0
 else
-    printf "${RED}$fail_count av $total_count tester misslyckades${RESET}\n"
+    if [ "$skip_count" -gt 0 ]; then
+        printf "${RED}$fail_count av $total_count tester misslyckades ($skip_count överhoppade)${RESET}\n"
+    else
+        printf "${RED}$fail_count av $total_count tester misslyckades${RESET}\n"
+    fi
     exit 1
 fi

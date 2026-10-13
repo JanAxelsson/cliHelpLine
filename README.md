@@ -15,7 +15,7 @@
 # Usage: ./backup.sh <source> <target>
 
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
-if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 
 cp -r "$1" "$2"
 echo "Backup complete!"
@@ -49,25 +49,25 @@ Copy and paste the two lines corresponding to your programming language right af
 ### Bash
 ```bash
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
-if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 ```
 
 ### Sh (POSIX)
 ```sh
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
-if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 ```
 
 ### Zsh
 ```zsh
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
-if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 ```
 
 ### Fish
 ```fish
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
-if contains -- "$argv[1]" --help -h '/?'; sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^\s*$/d' -e 's/^#//g' -e 's/^ //g' (status filename) | sed '$d'; exit 0; end
+if contains -- "$argv[1]" --help -h '/?'; sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' (status filename) | sed '$d'; exit 0; end
 ```
 
 ### Python
@@ -129,6 +129,7 @@ if {[expr {[lsearch -exact $argv "--help"] >= 0 || [lsearch -exact $argv "-h"] >
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO["argv"]) if (PROCINFO["argv"][a] ~ /^-[fE]$/) f=PROCINFO["argv"][a+1]; while ((getline l < f) > 0) { if (++nr == 1 && l ~ /^#!/ ) continue; if (l ~ /^##/) break; if (l ~ /^#/ || l ~ /\S/) { sub(/^# ?/, "", l); print l } } exit 0 } }
 ```
+> **Important:** Your script must use `#!/usr/bin/env -S gawk -E` on line 1 (the `-E` flag prevents AWK from intercepting `--help`, and `gawk` is required for `PROCINFO` so the script can locate its own file). On macOS, install via `brew install gawk`; on Linux, `gawk` is typically standard.
 
 ## How It Works & FAQ
 
@@ -147,12 +148,13 @@ git clone https://github.com/JanAxelsson/cliHelpLine
 cd cliHelpLine
 ```
 
-A multi-language Docker test suite is included to verify all 14 languages without having to install runtimes locally:
+A multi-language test suite is included to verify all scripts either inside Docker (with all 14 runtimes pre-installed) or natively on your host system:
 
 ```bash
-./run_tests.sh               # Run all tests (auto-starts Docker & builds image if needed)
+./run_tests.sh               # Run all 14 languages inside Docker (auto-builds image if needed)
+./run_tests.sh --local, -l   # Run locally on host system (verifies available runtimes)
 ./run_tests.sh python        # Run test for a specific language (or e.g. py, cliHelpLine.py)
-./run_tests.sh py rb fish    # Run tests for multiple specific targets
+./run_tests.sh -l bash zsh   # Run tests locally for specific targets
 ./run_tests.sh --build       # Force rebuild the Docker test image
 ./run_tests.sh --help        # Show all test runner options
 ```

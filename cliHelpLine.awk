@@ -1,4 +1,4 @@
-#!/usr/bin/gawk -E
+#!/usr/bin/env -S gawk -E
 #
 # Example script
 # ==============
