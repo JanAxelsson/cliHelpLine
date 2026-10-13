@@ -55,7 +55,7 @@ Copy and paste the two lines corresponding to your programming language right af
 
 <a id="languages"></a>
 > **Jump to:**  
-> [AWK](#awk) · [Bash](#bash) · [Fish](#fish) · [JavaScript](#javascript) · [Julia](#julia) · [Lua](#lua) · [Perl](#perl) · [PHP](#php) · [POSIX Shell](#posix-shell) · [PowerShell](#powershell) · [Python](#python) · [R](#r) · [Ruby](#ruby) · [Swift](#swift) · [Tcl](#tcl) · [TypeScript](#typescript) · [Zsh](#zsh)
+> [AWK](#awk) · [Bash](#bash) · [Fish](#fish) · [JavaScript](#javascript) · [Julia](#julia) · [Lua](#lua) · [Perl](#perl) · [PHP](#php) · [PowerShell](#powershell) · [Python](#python) · [R](#r) · [Ruby](#ruby) · [Sh](#sh) · [Swift](#swift) · [Tcl](#tcl) · [TypeScript](#typescript) · [Zsh](#zsh)
 
 ### AWK
 ```awk
@@ -115,13 +115,6 @@ if (array_intersect($argv ?? [], ['--help', '-h', '/?'])) { foreach (file(__FILE
 ```
 <small>[↑ Back to languages](#languages)</small>
 
-### POSIX Shell
-```sh
-## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
-if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
-```
-<small>[↑ Back to languages](#languages)</small>
-
 ### PowerShell
 ```powershell
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -147,6 +140,14 @@ if (any(commandArgs(trailingOnly=FALSE) %in% c("--help", "-h", "/?"))) { l <- re
 ```ruby
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if ARGV.any? { |a| %w[--help -h /?].include?(a) }; File.foreach(__FILE__).with_index { |l, i| next if i == 0 && l.start_with?('#!'); break if l.start_with?('##'); puts l.sub(/^# ?/, '').chomp if l.start_with?('#') || !l.strip.empty? }; exit 0; end
+```
+<small>[↑ Back to languages](#languages)</small>
+
+<a id="sh"></a>
+### Sh (POSIX Shell)
+```sh
+## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 ```
 <small>[↑ Back to languages](#languages)</small>
 
