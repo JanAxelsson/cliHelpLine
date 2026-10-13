@@ -20,7 +20,7 @@
 // ... more help text ...
 
 //// Help -- print file header until '////'    (see https://github.com/JanAxelsson/cliHelpLine)
-if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every(line => line.startsWith('#!') ? true : (line.startsWith('////') ? false : (console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }//// End Help
+if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every(line => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
 
 
 // Explanation
@@ -30,7 +30,8 @@ if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('f
 // .every(line =>                                                       // Loop through rows sequentially until any cycle returns false
 // line.startsWith('#!') ? true :                                       // If a Linux shebang row is present at line 1, skip it and continue (return true)
 // (line.startsWith('////') ? false :                                   // If row hits '////', return false to instantly break the loop and stop printing
-// (console.log(                                                        // Otherwise, pass the processed row into the console output stream:
+// ((line.startsWith('//') || line.trim() !== '') &&                    // Delete and ignore empty lines without comment characters
+// console.log(                                                         // Otherwise, pass the processed row into the console output stream:
 // line.startsWith('//') ? line.replace(/^\/\/ ?/, '')                  // Clean leading '//' and exactly ONE optional trailing space to preserve indentations
 // : line                                                               // If it is a standard code row, print it out exactly as it is written
 // ), true)));                                                          // Return true to keep the loop rolling onto the very next line
