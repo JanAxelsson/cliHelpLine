@@ -1,0 +1,81 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+  workflow_dispatch:
+
+jobs:
+  # ============================================================
+  # 1. Linux Job: Full Docker test suite with all 14 runtimes
+  # ============================================================
+  linux-docker:
+    name: Linux (Docker - All 14 languages)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker test image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: tests/Dockerfile
+          tags: clihelpline-tester:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run full test suite in Docker
+        run: |
+          chmod +x run_tests.sh tests/test_cliHelpLine.sh
+          ./run_tests.sh --docker
+
+  # ============================================================
+  # 2. macOS Job: Native macOS host tests (Darwin / Apple Silicon)
+  # ============================================================
+  macos-native:
+    name: macOS (Native Host - Darwin)
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install macOS runtimes via Homebrew
+        run: |
+          brew install gawk fish lua php r
+
+      - name: Run local tests on macOS
+        run: |
+          chmod +x run_tests.sh tests/test_cliHelpLine.sh
+          ./run_tests.sh --local
+
+  # ============================================================
+  # 3. Windows Job: Native Windows tests (pwsh, python, node, /?)
+  # ============================================================
+  windows-native:
+    name: Windows (Native Host)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run native Windows test suite (pwsh)
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -File tests/test_windows.ps1
+
+      - name: Run README.md snippet verification (Git Bash)
+        shell: bash
+        env:
+          MSYS_NO_PATHCONV: "1"
+        run: |
+          bash tests/test_cliHelpLine.sh --readme-only

@@ -1,5 +1,8 @@
 # cliHelpLine
 
+[![Tests](https://github.com/JanAxelsson/cliHelpLine/actions/workflows/tests.yml/badge.svg)](https://github.com/JanAxelsson/cliHelpLine/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 > **Turn your script's header comments into `--help`, `-h`, and `/?` output with a 2-line snippet.**  
 > Zero dependencies, zero boilerplate, and cross-platform across 14 scripting languages.
 

@@ -100,6 +100,12 @@ Stage 1: Local Host   Stage 2: Docker     Stage 3: README
 - **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where all 14 runtimes are installed.
 - **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 14 languages.
 
+### Continuous Integration (GitHub Actions - 3 Platforms):
+Automated CI runs on every push and pull request via `.github/workflows/tests.yml` across all 3 major operating systems:
+1. **Linux (`ubuntu-latest`):** Builds and runs the full 14-language Docker test suite (`./run_tests.sh --docker`) using Buildx layer caching.
+2. **macOS (`macos-latest`):** Runs native Darwin tests (`./run_tests.sh --local`) with all runtimes installed via Homebrew.
+3. **Windows (`windows-latest`):** Runs native Windows tests via [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) (`pwsh`, `python`, `node`, `/?` flag) plus README synchronization in Git Bash.
+
 ---
 
 ## 5. Test Runner Commands

@@ -1,0 +1,17 @@
+# Enforce LF line endings across all operating systems
+* text=auto eol=lf
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
+*.awk text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.rb text eol=lf
+*.pl text eol=lf
+*.php text eol=lf
+*.lua text eol=lf
+*.r text eol=lf
+*.ps1 text eol=lf
+*.tcl text eol=lf
+*.md text eol=lf
