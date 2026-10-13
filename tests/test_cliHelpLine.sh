@@ -16,7 +16,8 @@ RED="\033[0;31m"
 RESET="\033[0m"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-README_FILE="$SCRIPT_DIR/README.md"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+README_FILE="$PROJECT_ROOT/README.md"
 
 # Funktion för att köra ett cliHelpLine-skript med --help
 run_script_help() {
@@ -37,6 +38,8 @@ run_script_help() {
     case "$ext" in
         bash|sh)
             bash "$target" "$help_flag" 2>/dev/null ;;
+        zsh)
+            zsh "$target" "$help_flag" 2>/dev/null ;;
         py)
             if command -v python3 >/dev/null 2>&1 && output=$(python3 "$target" "$help_flag" 2>/dev/null); then
                 printf "%s\n" "$output"
@@ -47,7 +50,7 @@ run_script_help() {
             elif command -v python >/dev/null 2>&1; then
                 python "$target" "$help_flag" 2>/dev/null
             fi ;;
-        js)
+        js|mjs|cjs)
             if command -v node >/dev/null 2>&1 && output=$(node "$target" "$help_flag" 2>/dev/null); then
                 printf "%s\n" "$output"
             elif [ -x /usr/local/bin/node ]; then
@@ -55,6 +58,22 @@ run_script_help() {
             elif [ -x /opt/homebrew/bin/node ]; then
                 /opt/homebrew/bin/node "$target" "$help_flag" 2>/dev/null
             fi ;;
+        rb)
+            ruby "$target" "$help_flag" 2>/dev/null ;;
+        pl)
+            perl "$target" "$help_flag" 2>/dev/null ;;
+        php)
+            php "$target" "$help_flag" 2>/dev/null ;;
+        lua)
+            lua "$target" "$help_flag" 2>/dev/null || lua5.4 "$target" "$help_flag" 2>/dev/null ;;
+        r|R)
+            Rscript "$target" "$help_flag" 2>/dev/null ;;
+        ps1)
+            pwsh -NoProfile -File "$target" "$help_flag" 2>/dev/null ;;
+        tcl)
+            tclsh "$target" "$help_flag" 2>/dev/null ;;
+        awk)
+            awk -f "$target" -- "$help_flag" 2>/dev/null ;;
         *)
             "$target" "$help_flag" 2>/dev/null ;;
     esac
@@ -64,10 +83,19 @@ run_script_help() {
 lang_for_file() {
     local ext="${1##*.}"
     case "$ext" in
-        bash|sh) echo "bash" ;;
-        py)      echo "python" ;;
-        js)      echo "javascript" ;;
-        *)       echo "$ext" ;;
+        bash|sh)    echo "bash" ;;
+        zsh)        echo "zsh" ;;
+        py)         echo "python" ;;
+        js|mjs|cjs) echo "javascript" ;;
+        rb)         echo "ruby" ;;
+        pl)         echo "perl" ;;
+        php)        echo "php" ;;
+        lua)        echo "lua" ;;
+        r|R)        echo "r" ;;
+        ps1)        echo "powershell" ;;
+        tcl)        echo "tcl" ;;
+        awk)        echo "awk" ;;
+        *)          echo "$ext" ;;
     esac
 }
 
@@ -175,10 +203,14 @@ show_side_by_side() {
 files=()
 if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-        [ -f "$arg" ] && files+=("$arg")
+        if [ -f "$arg" ]; then
+            files+=("$arg")
+        elif [ -f "$PROJECT_ROOT/$arg" ]; then
+            files+=("$PROJECT_ROOT/$arg")
+        fi
     done
 else
-    for f in "$SCRIPT_DIR"/cliHelpLine.*; do
+    for f in "$PROJECT_ROOT"/cliHelpLine.*; do
         [ -f "$f" ] || continue
         # Hoppa över test-skriptet självt eller temporära filer
         case "$(basename "$f")" in
