@@ -30,7 +30,7 @@ ${WINDOWS_OUT:-No output available}
   [ OK ] Stage 1: Docker tests (Linux container)
   [ OK ] Stage 2: README.md synchronization (17/17 languages)
   [ OK ] Stage 3: macOS Darwin tests (17/17 languages)
-  [ OK ] Stage 4: Windows native tests (pwsh, py, js, ts)
+  [ OK ] Stage 4: Windows native tests (pwsh, py, js, ts - LF, CRLF, Mixed EOL)
 ================================================================
 All tests passed across Linux, macOS, and Windows!
 EOF
@@ -68,7 +68,7 @@ ${WINDOWS_OUT:-No output available}
   [ OK ] Stage 1: Docker tests (Linux container)
   [ OK ] Stage 2: README.md synchronization (17/17 languages)
   [ OK ] Stage 3: macOS Darwin tests (17/17 languages)
-  [ OK ] Stage 4: Windows native tests (pwsh, py, js, ts)
+  [ OK ] Stage 4: Windows native tests (pwsh, py, js, ts - LF, CRLF, Mixed EOL)
 ================================================================
 All tests passed across Linux, macOS, and Windows!
 \`\`\`

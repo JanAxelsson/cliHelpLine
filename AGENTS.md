@@ -172,8 +172,8 @@ Automated CI runs on every push and pull request across all branches via `.githu
 
 3. **`test-windows` (Windows `windows-latest`):**
    - **Native Windows Server Runner:** Executes natively in PowerShell 7 (`pwsh`).
-   - **Stage 4 (Windows Native Tests):** Runs [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) to verify PowerShell (`pwsh`), Python, and Node.js.
-   - **Windows-Specific Validation:** Explicitly tests the native Windows **`/?`** flag in addition to `-h` and `--help`, plus normal execution. Does **not** re-run README sync (avoids test duplication).
+   - **Stage 4 (Windows Native Tests):** Runs [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) to verify PowerShell (`pwsh`), Python, Node.js, and TypeScript across LF, CRLF, and Mixed line endings.
+   - **Windows-Specific Validation:** Explicitly tests the native Windows **`/?`** flag in addition to `-h` and `--help`, plus normal execution across all 3 line ending modes (pure LF from git, pure Windows CRLF, and mixed CRLF/LF simulating pasting from a browser). Does **not** re-run README sync (avoids test duplication).
    - **Output Passing:** Emits results to `$env:GITHUB_OUTPUT`.
 
 4. **`summary` (Unified Front-Page Dashboard):**
