@@ -23,7 +23,16 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 README_FILE="$PROJECT_ROOT/README.md"
 
-# Extract the binary command expected by the script's shebang line (if any)
+# ==============================================================================
+# Helper Runners: Shebang extraction, direct execution, and language command execution
+# ==============================================================================
+
+# Extract the primary binary command expected by the script's shebang line (if any).
+# Examples:
+#   '#!/usr/bin/env -S gawk -E' -> 'gawk'
+#   '#!/usr/bin/env bun'        -> 'bun'
+#   '#!/bin/bash'               -> 'bash'
+#   '<?php'                     -> '' (no shebang)
 get_shebang_cmd() {
     local file="$1"
     local first_line
@@ -32,6 +41,7 @@ get_shebang_cmd() {
         '#!'*)
             local line="${first_line#\#!}"
             line="${line#"${line%%[![:space:]]*}"}"
+            # Match '/usr/bin/env [-S] <binary>' or direct binary path
             if [[ "$line" =~ /?env[[:space:]]+(-S[[:space:]]+)?([^[:space:]]+) ]]; then
                 echo "${BASH_REMATCH[2]}"
             else
@@ -44,14 +54,18 @@ get_shebang_cmd() {
     esac
 }
 
-# Function to execute a script directly via shebang
+# Execute a script directly via its shebang line (e.g. './cliHelpLine.py')
+# - Uses '< /dev/null' to prevent interactive stdin prompts from hanging
+# - Disables gem scanning on macOS to avoid Ruby Errno::EPERM
+# - Configures Swift module cache path
 run_script_direct() {
     local target="$1"
     shift
     RUBYOPT="--disable-gems" CLANG_MODULE_CACHE_PATH="${TMPDIR:-/tmp}/swift-cache" "$target" "$@" < /dev/null 2>/dev/null
 }
 
-# Function to execute a script using its language command first
+# Execute a script using its language command first (e.g. 'python3 cliHelpLine.py')
+# Passes language-specific flags (e.g. gawk '-E' to avoid option swallowing, pwsh '-NoProfile -File')
 run_script_cmd() {
     local target="$1"
     shift
@@ -154,49 +168,20 @@ is_interpreter_available() {
     esac
 }
 
-get_interpreter_name() {
-    local ext="${1##*.}"
-    case "$ext" in
-        bash)       echo "bash" ;;
-        sh)         echo "sh" ;;
-        zsh)        echo "zsh" ;;
-        fish)       echo "fish" ;;
-        py)         echo "python3" ;;
-        js|mjs|cjs) echo "node" ;;
-        rb)         echo "ruby" ;;
-        pl)         echo "perl" ;;
-        php)        echo "php" ;;
-        lua)        echo "lua" ;;
-        r|R)        echo "Rscript" ;;
-        ps1)        echo "pwsh" ;;
-        tcl)        echo "tclsh" ;;
-        awk)        echo "gawk" ;;
-        ts)
-            if command -v bun >/dev/null 2>&1; then echo "bun"
-            elif command -v tsx >/dev/null 2>&1; then echo "tsx"
-            elif command -v deno >/dev/null 2>&1; then echo "deno"
-            elif command -v ts-node >/dev/null 2>&1; then echo "ts-node"
-            else echo "bun/tsx/deno"
-            fi
-            ;;
-        jl)         echo "julia" ;;
-        swift)      echo "swift" ;;
-        *)          echo "$ext" ;;
-    esac
-}
-
-# Return the command prefix used to invoke the script explicitly
+# Return the command prefix used to invoke the script explicitly (e.g. 'python3', 'gawk -E', 'node')
+# Used both for test logging and for extracting the base interpreter binary when reporting skips.
 get_command_display() {
     local target="$1"
     local ext="${target##*.}"
     case "$ext" in
         awk)
-            if command -v gawk >/dev/null 2>&1; then echo "gawk -E"; else echo "awk -f"; fi ;;
+            if command -v gawk >/dev/null 2>&1; then echo "gawk -E"; else echo "gawk"; fi ;;
         bash) echo "bash" ;;
         sh)   echo "sh" ;;
         zsh)  echo "zsh" ;;
         fish) echo "fish" ;;
-        py)   echo "python3" ;;
+        py)
+            if command -v python3 >/dev/null 2>&1; then echo "python3"; elif command -v python >/dev/null 2>&1; then echo "python"; else echo "python3"; fi ;;
         js|mjs|cjs) echo "node" ;;
         rb)   echo "ruby" ;;
         pl)   echo "perl" ;;
@@ -213,7 +198,7 @@ get_command_display() {
             elif command -v tsx >/dev/null 2>&1; then echo "tsx";
             elif command -v deno >/dev/null 2>&1; then echo "deno";
             elif command -v ts-node >/dev/null 2>&1; then echo "ts-node";
-            else echo "node"; fi ;;
+            else echo "bun/tsx"; fi ;;
         *)    echo "$ext" ;;
     esac
 }
@@ -384,25 +369,37 @@ for arg in "$@"; do
     esac
 done
 
-# Determine files to test
+# ==============================================================================
+# Target File Discovery: Identify which script files to test
+# ==============================================================================
+# The test runner supports running against specific files, extensions, or language
+# names (e.g. './run_tests.sh py', './run_tests.sh bash', 'cliHelpLine.php'), or
+# running against the full suite if no positional arguments were provided.
+# ==============================================================================
 EXAMPLES_DIR="$PROJECT_ROOT/examples"
 files=()
+
 if [ "${#filtered_args[@]}" -gt 0 ]; then
+    # Mode A: User supplied target arguments (file path, extension, or language name)
     for arg in "${filtered_args[@]}"; do
         arg_clean="${arg#.}"
         arg_clean="$(basename "$arg_clean")"
         if [ -f "$arg" ]; then
+            # Direct path provided (e.g. 'examples/cliHelpLine.py')
             files+=("$arg")
         elif [ -f "$EXAMPLES_DIR/$arg" ]; then
+            # Relative to examples directory (e.g. 'cliHelpLine.py')
             files+=("$EXAMPLES_DIR/$arg")
         elif [ -f "$PROJECT_ROOT/$arg" ]; then
+            # Relative to project root
             files+=("$PROJECT_ROOT/$arg")
         elif [ -f "$EXAMPLES_DIR/cliHelpLine.$arg_clean" ]; then
+            # Extension shorthand provided (e.g. 'py' -> 'cliHelpLine.py')
             files+=("$EXAMPLES_DIR/cliHelpLine.$arg_clean")
         elif [ -f "$PROJECT_ROOT/cliHelpLine.$arg_clean" ]; then
             files+=("$PROJECT_ROOT/cliHelpLine.$arg_clean")
         else
-            # Match against language name (e.g. 'python' -> cliHelpLine.py)
+            # Language name provided (e.g. 'python' -> matches 'examples/cliHelpLine.py')
             matched=""
             for search_dir in "$EXAMPLES_DIR" "$PROJECT_ROOT"; do
                 [ -d "$search_dir" ] || continue
@@ -422,11 +419,14 @@ if [ "${#filtered_args[@]}" -gt 0 ]; then
         fi
     done
 else
+    # Mode B: Default full-suite discovery
+    # Globs all 'cliHelpLine.*' (standard scripts) and 'cliHelpLine_*.*' (specialized variants,
+    # e.g. 'cliHelpLine_web.php') across the examples directory.
     search_dir="$EXAMPLES_DIR"
     [ -d "$search_dir" ] || search_dir="$PROJECT_ROOT"
     for f in "$search_dir"/cliHelpLine.* "$search_dir"/cliHelpLine_*.*; do
         [ -f "$f" ] || continue
-        # Skip the test script itself or temporary files
+        # Ignore self (test runner scripts), temporary backups, or editor swap files
         case "$(basename "$f")" in
             *test*|*.tmp|*.bak|*.swp) continue ;;
         esac
@@ -439,11 +439,20 @@ if [ "${#files[@]}" -eq 0 ]; then
     exit 1
 fi
 
+# ==============================================================================
+# Test Execution State & Temp Files
+# ==============================================================================
+# Independent counters ensure accurate math across sub-test filters and skipped targets:
+#   total_run  : total number of individual tests actually executed
+#   pass_count : number of tests that passed
+#   fail_count : number of tests that failed
+#   skip_count : number of tests skipped due to missing host interpreters
 total_run=0
 pass_count=0
 fail_count=0
 skip_count=0
 
+# Temporary files for capturing and comparing expected vs actual outputs
 expected_tmp=$(mktemp)
 actual_tmp=$(mktemp)
 run_actual_tmp=$(mktemp)
@@ -451,7 +460,15 @@ script_snip_tmp=$(mktemp)
 readme_snip_tmp=$(mktemp)
 trap 'rm -f "$expected_tmp" "$actual_tmp" "$run_actual_tmp" "$script_snip_tmp" "$readme_snip_tmp"' EXIT
 
-# --- Part 1: Verify direct execution via shebang (./cliHelpLine.<ext>) ---
+# ==============================================================================
+# Part 1: Verify direct execution via shebang (./cliHelpLine.<ext>)
+# ==============================================================================
+# Tests running each script directly via its shebang line ('#!'):
+#   1. './cliHelpLine.<ext> --help' -> must match header comments and stop at boundary
+#   2. './cliHelpLine.<ext>'        -> must fall through and print 'Hello world!'
+# Scripts without a shebang (e.g. 'cliHelpLine_web.php') are quietly collected in
+# 'direct_skipped' without failing. Scripts requiring interpreters not installed on
+# the host/container (e.g. Swift on Linux) are cleanly skipped.
 if [ "$RUN_DIRECT" -eq 1 ]; then
     echo "--- Verifying direct execution via shebang (./cliHelpLine.<ext>) "
     direct_skipped=()
@@ -505,21 +522,28 @@ if [ "$RUN_DIRECT" -eq 1 ]; then
     echo ""
 fi
 
-# --- Part 2: Verify language command execution (<cmd> cliHelpLine.<ext>) ---
+# ==============================================================================
+# Part 2: Verify language command execution (<cmd> cliHelpLine.<ext>)
+# ==============================================================================
+# Tests running each script with its language interpreter starter:
+#   1. '<cmd> cliHelpLine.<ext> --help' -> must match header comments and stop at boundary
+#   2. '<cmd> cliHelpLine.<ext>'        -> must fall through and print 'Hello world!'
+# Examples: 'python3 cliHelpLine.py', 'gawk -E cliHelpLine.awk', 'node cliHelpLine.js'
 if [ "$RUN_CMD" -eq 1 ]; then
     echo "--- Verifying language command execution (<cmd> cliHelpLine.<ext>) "
     cmd_skipped=()
     for target in "${files[@]}"; do
         target_name="$(basename "$target")"
+        cmd_display=$(get_command_display "$target")
+        bin_name="${cmd_display%% *}"  # Extract primary binary (e.g. 'gawk' from 'gawk -E')
 
+        # Check if the runtime interpreter is available on the system
         if ! is_interpreter_available "$target"; then
-            interp=$(get_interpreter_name "$target")
-            cmd_skipped+=("$target_name ('$interp' not installed)")
+            cmd_skipped+=("$target_name ('$bin_name' not installed)")
             skip_count=$((skip_count + 1))
             continue
         fi
 
-        cmd_display=$(get_command_display "$target")
         total_run=$((total_run + 1))
 
         # 1. Help output verification: --help must match header comments and stop
@@ -554,7 +578,11 @@ if [ "$RUN_CMD" -eq 1 ]; then
     echo ""
 fi
 
-# --- Part 3: Verify comment + one-liner against README.md ---
+# ==============================================================================
+# Part 3: Verify 2-line code snippet against README.md
+# ==============================================================================
+# Extracts the double-comment marker line and one-liner snippet from each script
+# and compares them byte-for-byte against the fenced code block in README.md.
 if [ "$RUN_README" -eq 1 ]; then
     echo "--- Verifying 2-line code snippet against README.md "
     if [ ! -f "$README_FILE" ]; then

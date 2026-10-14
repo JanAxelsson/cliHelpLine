@@ -242,8 +242,9 @@ When adding language #18+:
    - Update total language count in header / summary text if applicable.
 3. **Update `tests/test_cliHelpLine.sh`:**
    - Add extension mapping in `lang_for_file()`.
-   - Add interpreter check in `is_interpreter_available()` and `get_interpreter_name()`.
-   - Add execution command in `run_script()`.
+   - Add interpreter availability check in `is_interpreter_available()`.
+   - Add display command in `get_command_display()` (used for test logging and skip binary detection).
+   - Add execution command in `run_script_cmd()`.
 4. **Update `tests/Dockerfile`:**
    - Add interpreter package or binary installation to `apt-get install` or `/opt`.
 5. **Verify:**
