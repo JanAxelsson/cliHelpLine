@@ -228,10 +228,10 @@ if {[expr {[lsearch -exact $argv "--help"] >= 0 || [lsearch -exact $argv "-h"] >
 if (process.argv.some((arg: string) => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every((line: string) => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
 ```
 > <small>**Tip:** You can run TypeScript scripts directly without a build step:</small>
+> - <small>**Node.js (23.6+):** Use shebang `#!/usr/bin/env node` or run `node script.ts`</small>
+> - <small>**Node.js (22.6+):** Use shebang `#!/usr/bin/env -S node --experimental-strip-types` or run `node --experimental-strip-types script.ts`</small>
 > - <small>**[Bun](https://bun.sh):** Use shebang `#!/usr/bin/env bun` or run `bun script.ts`</small>
-> - <small>**Node.js (23.6+):** Use shebang `#!/usr/bin/env node` or run `node script.ts` *(or `node --experimental-strip-types script.ts` on Node 22.6+)*</small>
 > - <small>**[tsx](https://github.com/privatenumber/tsx):** Use shebang `#!/usr/bin/env -S npx tsx` or run `npx tsx script.ts`</small>
-> - <small>**[Deno](https://deno.com):** Use shebang `#!/usr/bin/env -S deno run --allow-read` or run `deno run --allow-read script.ts`</small>
 
 <small>[`cliHelpLine.ts`](examples/cliHelpLine.ts) · [↑](#languages "Back to languages")</small>
 

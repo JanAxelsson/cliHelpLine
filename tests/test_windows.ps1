@@ -89,7 +89,7 @@ Write-Host "--- Verifying Windows execution (LF, CRLF, Mixed EOL, /? flag)"
 # Locate interpreters
 $pyCmd = Find-WorkingCommand @("python", "python3")
 $nodeCmd = Find-WorkingCommand @("node")
-$tsCmd = Find-WorkingCommand @("tsx.cmd", "tsx", "bun.exe", "bun", "deno.exe", "deno", "ts-node.cmd", "ts-node")
+$tsCmd = Find-WorkingCommand @("tsx.cmd", "tsx", "bun.exe", "bun", "ts-node.cmd", "ts-node")
 
 # Create temporary directories for CRLF and Mixed EOL variants
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("clihelpline_win_tests_" + [System.Guid]::NewGuid().ToString("N"))

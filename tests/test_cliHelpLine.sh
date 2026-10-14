@@ -121,8 +121,6 @@ run_script_cmd() {
                 bun run "$target" "$@" < /dev/null 2>/dev/null
             elif command -v tsx >/dev/null 2>&1; then
                 tsx "$target" "$@" < /dev/null 2>/dev/null
-            elif command -v deno >/dev/null 2>&1; then
-                deno run --allow-read "$target" "$@" < /dev/null 2>/dev/null
             elif command -v ts-node >/dev/null 2>&1; then
                 ts-node --transpile-only "$target" "$@" < /dev/null 2>/dev/null
             elif command -v node >/dev/null 2>&1; then
@@ -171,7 +169,7 @@ is_interpreter_available() {
         ps1)  command -v pwsh >/dev/null 2>&1 ;;
         tcl)  command -v tclsh >/dev/null 2>&1 ;;
         awk)  command -v gawk >/dev/null 2>&1 ;;
-        ts)   command -v bun >/dev/null 2>&1 || command -v tsx >/dev/null 2>&1 || command -v deno >/dev/null 2>&1 || command -v ts-node >/dev/null 2>&1 || (command -v node >/dev/null 2>&1 && node --experimental-strip-types -e 'process.exit(0)' >/dev/null 2>&1) ;;
+        ts)   command -v bun >/dev/null 2>&1 || command -v tsx >/dev/null 2>&1 || command -v ts-node >/dev/null 2>&1 || (command -v node >/dev/null 2>&1 && node --experimental-strip-types -e 'process.exit(0)' >/dev/null 2>&1) ;;
         jl)   command -v julia >/dev/null 2>&1 ;;
         swift) command -v swift >/dev/null 2>&1 ;;
         cr)   command -v crystal >/dev/null 2>&1 ;;
@@ -216,7 +214,6 @@ get_command_display() {
         ts)
             if command -v bun >/dev/null 2>&1; then echo "bun";
             elif command -v tsx >/dev/null 2>&1; then echo "tsx";
-            elif command -v deno >/dev/null 2>&1; then echo "deno";
             elif command -v ts-node >/dev/null 2>&1; then echo "ts-node";
             else echo "bun/tsx"; fi ;;
         *)    echo "$ext" ;;

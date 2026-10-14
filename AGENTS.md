@@ -45,7 +45,7 @@ All 22 language examples live in the `examples/` directory and are organized alp
 | **Sh (POSIX Shell)** | `examples/cliHelpLine.sh` | `#` | `##` | `sh` (POSIX compliant, sorted under S) |
 | **Swift** | `examples/cliHelpLine.swift` | `//` | `////` | `swift` (`CommandLine`, `#file`) |
 | **Tcl** | `examples/cliHelpLine.tcl` | `#` | `##` | `tclsh` (`$argv`, `$argv0`) |
-| **TypeScript** | `examples/cliHelpLine.ts` | `//` | `////` | `bun` / `node 22.6+` / `tsx` / `deno` |
+| **TypeScript** | `examples/cliHelpLine.ts` | `//` | `////` | `bun` / `node 22.6+` / `tsx` |
 | **Zsh** | `examples/cliHelpLine.zsh` | `#` | `##` | `zsh` |
 
 ---
