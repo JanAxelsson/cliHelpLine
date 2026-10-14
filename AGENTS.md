@@ -102,6 +102,30 @@ When invoking command-line runners in test scripts (especially `npx tsx`), alway
 - **PHP CLI vs. Web Dual Examples:** PHP scripts in web environments (FastCGI, PHP-FPM, Apache) leak shebang lines into HTTP response headers/body. cliHelpLine provides `examples/cliHelpLine.php` (CLI with `#!/usr/bin/env php` and `<?php`) and `examples/cliHelpLine_web.php` (starts directly with `<?php` without shebang). The test suite automatically tests both under `php <file>` and cleanly skips `cliHelpLine_web.php` in direct shebang execution.
 - **Accurate Counting:** Test counting uses independent `total_run`, `pass_count`, `fail_count`, and `skip_count` variables to ensure test summaries remain mathematically accurate across subsets and skipped tests.
 
+### H. Line Endings (EOL), Windows Realities, and GitHub Copy-Paste Semantics
+1. **GitHub Markdown Spec & Browser Clipboard Realities:**
+   - The [GitHub Flavored Markdown (GFM) specification](https://github.github.com/gfm/#line-endings) explicitly mandates that all line breaks in Markdown source files are normalized to Unix `\n` (LF) during server-side HTML rendering.
+   - When a user copies a code block from GitHub's web interface (via the "Copy" button or manual `Ctrl+C`), the browser's Clipboard API (`navigator.clipboard.writeText`) places raw `\n` (LF) strings onto the Windows clipboard.
+   - There is no repository-side mechanism (via `.gitattributes`, HTTP headers, or HTML tricks) to force GitHub's web application to deliver or copy `\r\n`.
+2. **The 3 EOL States on Windows:**
+   - **Pure LF:** Checkouts directly from Git (enforced by `.gitattributes` via `* text=auto eol=lf`) or edited in Unix-configured editors.
+   - **Pure CRLF:** Standard Windows files created or saved in traditional Windows editors (classic Notepad, Visual Studio) where all lines end with `\r\n`.
+   - **Mixed CRLF + LF (The Browser Copy-Paste Scenario):** When a Windows developer pastes an LF snippet copied from GitHub into their existing Windows CRLF script (`Ctrl+V`), modern editors (VS Code, Sublime Text, Notepad++) insert the clipboard's `\n` literally. The resulting file has `\r\n` for top header comments and script body, but `\n` for the 2-line snippet.
+3. **Strict Resilient One-Liner Design:**
+   Because neither GitHub nor the developer's text editor can be controlled, snippets for Windows-supported languages must be resilient across all 3 states:
+   - **PowerShell (`cliHelpLine.ps1`):** `Get-Content` uses .NET `StreamReader.ReadLine()`, which inherently strips away both `\r\n` and `\n` on all OSes.
+   - **Python (`cliHelpLine.py`):** Uses `.rstrip('\r\n')` (and universal newlines in `open(...)`), stripping carriage returns regardless of line ending style.
+   - **JavaScript / TypeScript (`cliHelpLine.js` & `cliHelpLine.ts`):** Uses `.split(/\r?\n/)`, splitting cleanly on both `\r\n` and `\n` without leaving trailing `\r` carriage returns.
+   - **Ruby (`cliHelpLine.rb`):** Uses `.chomp` (removes `\r\n`, `\n`, or `\r`).
+   - **Perl (`cliHelpLine.pl`):** Uses `s/\r?\n$//` or `chomp`.
+4. **Why Unix (Linux & macOS) Must NOT Test CRLF:**
+   - On Linux and macOS, the kernel's `execve()` system call inspects shebang lines directly. If a file has CRLF endings, `\r` is treated as part of the interpreter binary name (`/usr/bin/env: 'python3\r': No such file or directory`), causing immediate OS kernel failure for all 17 languages.
+   - POSIX shells (`bash`, `sh`, `zsh`) treat `\r` as illegal syntax tokens (`syntax error near unexpected token $'\r'`).
+   - Therefore, CRLF is an unsupported defect state on Unix.
+5. **Windows Native CI Testing (`tests/test_windows.ps1`):**
+   - [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) verifies PowerShell, Python, Node.js, and TypeScript across all 3 EOL modes (`[LF]`, `[CRLF]`, and `[Mixed]`), testing `--help`, `-h`, the native Windows `/?` flag, and normal execution without arguments (48 tests total).
+   - **No-BOM UTF-8 Requirement:** When generating test fixtures programmatically in PowerShell/.NET, always instantiate `New-Object System.Text.UTF8Encoding($false)`. Using default `[System.Text.Encoding]::UTF8` emits a UTF-8 Byte Order Mark (BOM: `\xEF\xBB\xBF`), which prepends invisible bytes before `#!` and causes Node.js syntax errors.
+
 ---
 
 ## 4. Testing Architecture (3 Stages)
