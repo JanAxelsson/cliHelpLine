@@ -266,7 +266,7 @@ bash tests/test_cliHelpLine.sh --readme-only   # Run README verification only
 
 ## 6. Checklist: How to Add a New Language
 
-When adding language #18+:
+When adding support for a new language:
 1. **Create `examples/cliHelpLine.<ext>`:**
    - Shebang (if applicable).
    - Multi-line header documentation.
@@ -275,11 +275,10 @@ When adding language #18+:
    - Code explanation in comments.
    - Runnable code block printing `"Hello world!"`.
 2. **Update `README.md`:**
-   - Add language link to the alphabetical jump bar under `## Code to use`.
-   - Add `<a id="<lang>"></a>` and `#### > <LanguageName>` in alphabetical position.
+   - Add language link to the alphabetical jump bar under `## CODE TO USE`.
+   - Add `<a id="<lang>"></a>` and `#### > <LanguageName>` in alphabetical position (A–Z).
    - Add the exact 2-line code block in fenced syntax (```` ```<lang> ````).
    - Add footer link: `<small>[`cliHelpLine.<ext>`](examples/cliHelpLine.<ext>) · [↑](#languages "Back to languages")</small>`.
-   - Update total language count in header / summary text if applicable.
 3. **Update `tests/test_cliHelpLine.sh`:**
    - Add extension mapping in `lang_for_file()`.
    - Add interpreter availability check in `is_interpreter_available()`.
@@ -290,9 +289,8 @@ When adding language #18+:
 5. **Verify:**
    - Run `./run_tests.sh --local` and `./run_tests.sh --docker` (or `./run_tests.sh --build`).
    - Ensure all 3 test stages pass.
-6. **Update `AGENTS.md`:**
+6. **Update `AGENTS.md` & `CONTRIBUTING.md`:**
    - Add the new language to the table in Section 2 (alphabetical order).
-   - Increment total language counts in the documentation.
 
 ---
 

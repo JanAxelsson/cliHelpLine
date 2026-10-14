@@ -5,9 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **Turn your script's header comments into `--help`, `-h`, and `/?` output with a 2-line snippet.**  
-> Zero dependencies, zero boilerplate, and cross-platform across 23 scripting languages.
+> Zero dependencies, zero boilerplate, and cross-platform across major scripting languages.
 
-In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help is effortless: the comments at the top of a file automatically become the documentation. `cliHelpLine` brings that exact zero-overhead pattern to Bash, Python, Node.js, Ruby, TypeScript, Julia, Swift, and 16 other languages—no heavyweight CLI frameworks or argument-parsing libraries required.
+In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help is effortless: the comments at the top of a file automatically become the documentation. `cliHelpLine` brings that exact zero-overhead pattern to Bash, Python, Node.js, Ruby, TypeScript, Julia, Swift, and many other scripting languages—no heavyweight CLI frameworks or argument-parsing libraries required.
 
 <!-- Optional: Demo GIF can be embedded here -->
 <!-- ![cliHelpLine Demo](demo.gif) -->
@@ -47,11 +47,11 @@ Usage: ./backup.sh <source> <target>
 
 ## FEATURES
 
-- **Zero Boilerplate:** Say goodbye to complex argument parsing libraries just to print a help message.
+- **Zero Boilerplate & Zero Dependencies:** Say goodbye to complex argument parsing libraries and heavy dependencies (`argparse`, `commander`, `getopts`, `yargs`, `clap`) just to print a usage message.
 - **Single Source of Truth:** Your documentation lives inside the code comments at the very top of your file.
 - **Cross-Platform:** Works out-of-the-box with Unix `--help` and `-h`, as well as Windows `/?`.
 - **Compatible with Further Argument Parsing:** Only intercepts help requests; silently falls through for normal runs so you can still parse other arguments as usual.
-- **Multi-Language:** Works seamlessly across 24 scripting languages.
+- **Multi-Language:** Works seamlessly across a wide range of scripting languages.
 
 <br>
 
@@ -317,7 +317,7 @@ A 3-stage multi-language test suite is included to thoroughly verify all scripts
 ```bash
 ./run_tests.sh               # Runs all 3 test stages:
                              #   1. Local host verification (Darwin/Linux)
-                             #   2. Docker full-suite verification (all 17 languages)
+                             #   2. Docker full-suite verification (Linux languages)
                              #   3. README.md code snippet synchronization
 ./run_tests.sh --local, -l   # Run local test + README test only (skips Docker)
 ./run_tests.sh --docker, -d  # Run Docker test + README test only (skips local)
@@ -332,7 +332,7 @@ Please give the cliHelpLine project a star ⭐ on GitHub if you find it useful!
 
 ## CONTRIBUTING
 
-If you want to add support for another scripting language, feel free to open an issue or send a pull request!
+Contributions are welcome! Whether adding support for a new language, improving existing one-liners, or refining documentation, please see [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines, testing workflows, and the new language checklist.
 
 <br>
 
