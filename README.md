@@ -12,8 +12,9 @@ In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help 
 <!-- Optional: Demo GIF can be embedded here -->
 <!-- ![cliHelpLine Demo](demo.gif) -->
 
-  
-## Quick Example
+<br>
+
+## QUICK EXAMPLE
 
 1. In your script (e.g. `backup.sh`), write your header comments followed by the 2-line snippet:
 
@@ -42,8 +43,9 @@ backup.sh - Quick directory backup tool
 Usage: ./backup.sh <source> <target>
 ```
 
-  
-## Features
+<br>
+
+## FEATURES
 
 - **Zero Boilerplate:** Say goodbye to complex argument parsing libraries just to print a help message.
 - **Single Source of Truth:** Your documentation lives inside the code comments at the very top of your file.
@@ -51,7 +53,9 @@ Usage: ./backup.sh <source> <target>
 - **Compatible with Further Argument Parsing:** Only intercepts help requests; silently falls through for normal runs so you can still parse other arguments as usual.
 - **Multi-Language:** Works seamlessly across 24 scripting languages.
 
-## Code to use
+<br>
+
+## CODE TO USE
 
 Copy and paste the two lines corresponding to your programming language right after your header comment:
 
@@ -60,7 +64,7 @@ Copy and paste the two lines corresponding to your programming language right af
 > [AWK](#awk) · [Bash](#bash) · [Batch (.bat)](#batch) · [Crystal](#crystal) · [Dart](#dart) · [Elixir](#elixir) · [Fish](#fish) · [Groovy](#groovy) · [JavaScript](#javascript) · [Julia](#julia) · [Lua](#lua) · [Nim](#nim) · [Perl](#perl) · [PHP](#php) · [PowerShell](#powershell) · [Python](#python) · [R](#r) · [Raku](#raku) · [Ruby](#ruby) · [Sh](#sh) · [Swift](#swift) · [Tcl](#tcl) · [TypeScript](#typescript) · [Zsh](#zsh)
 
 <a id="awk"></a>
-### AWK
+#### > AWK
 
 ```awk
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -71,7 +75,7 @@ BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO
 <small>[`cliHelpLine.awk`](examples/cliHelpLine.awk) · [↑](#languages "Back to languages")</small>
 
 <a id="bash"></a>
-### Bash
+#### > Bash
 
 ```bash
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -80,7 +84,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#
 <small>[`cliHelpLine.bash`](examples/cliHelpLine.bash) · [↑](#languages "Back to languages")</small>
 
 <a id="batch"></a>
-### Batch (.bat)
+#### > Batch (.bat)
 
 ```bat
 REM REM Help -- prints header above (stops at 'REM REM')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -91,7 +95,7 @@ REM REM Help -- prints header above (stops at 'REM REM')  (see https://github.co
 <small>[`cliHelpLine.bat`](examples/cliHelpLine.bat) · [↑](#languages "Back to languages")</small>
 
 <a id="crystal"></a>
-### Crystal
+#### > Crystal
 
 ```crystal
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -100,7 +104,7 @@ if (ARGV & ["--help", "-h", "/?"]).any?; File.each_line(__FILE__) { |l| next if 
 <small>[`cliHelpLine.cr`](examples/cliHelpLine.cr) · [↑](#languages "Back to languages")</small>
 
 <a id="dart"></a>
-### Dart
+#### > Dart
 
 ```dart
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -109,7 +113,7 @@ import 'dart:io'; void main(List<String> a) { if (a.any(['--help', '-h', '/?'].c
 <small>[`cliHelpLine.dart`](examples/cliHelpLine.dart) · [↑](#languages "Back to languages")</small>
 
 <a id="elixir"></a>
-### Elixir
+#### > Elixir
 
 ```elixir
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -118,7 +122,7 @@ if Enum.any?(System.argv(), &(&1 in ["--help", "-h", "/?"])), do: (File.stream!(
 <small>[`cliHelpLine.exs`](examples/cliHelpLine.exs) · [↑](#languages "Back to languages")</small>
 
 <a id="fish"></a>
-### Fish
+#### > Fish
 
 ```fish
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -127,7 +131,7 @@ if contains -- "$argv[1]" --help -h '/?'; sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^
 <small>[`cliHelpLine.fish`](examples/cliHelpLine.fish) · [↑](#languages "Back to languages")</small>
 
 <a id="groovy"></a>
-### Groovy
+#### > Groovy
 
 ```groovy
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -136,7 +140,7 @@ if (args.any { it in ["--help", "-h", "/?"] }) { new File(getClass().protectionD
 <small>[`cliHelpLine.groovy`](examples/cliHelpLine.groovy) · [↑](#languages "Back to languages")</small>
 
 <a id="javascript"></a>
-### JavaScript
+#### > JavaScript
 
 ```javascript
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -145,7 +149,7 @@ if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('f
 <small>[`cliHelpLine.js`](examples/cliHelpLine.js) · [↑](#languages "Back to languages")</small>
 
 <a id="julia"></a>
-### Julia
+#### > Julia
 
 ```julia
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -154,7 +158,7 @@ if any(in(["--help", "-h", "/?"]), ARGS); for l in eachline(@__FILE__); startswi
 <small>[`cliHelpLine.jl`](examples/cliHelpLine.jl) · [↑](#languages "Back to languages")</small>
 
 <a id="lua"></a>
-### Lua
+#### > Lua
 
 ```lua
 ---- Help -- prints header above (stops at '----')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -163,7 +167,7 @@ if (function(args) for _,a in ipairs(args) do if a=="--help" or a=="-h" or a=="/
 <small>[`cliHelpLine.lua`](examples/cliHelpLine.lua) · [↑](#languages "Back to languages")</small>
 
 <a id="nim"></a>
-### Nim
+#### > Nim
 
 ```nim
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -172,7 +176,7 @@ import std/[os, sequtils, strutils]; if ["--help", "-h", "/?"].anyIt(it in comma
 <small>[`cliHelpLine.nim`](examples/cliHelpLine.nim) · [↑](#languages "Back to languages")</small>
 
 <a id="perl"></a>
-### Perl
+#### > Perl
 
 ```perl
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -181,7 +185,7 @@ if (grep { $_ eq '--help' || $_ eq '-h' || $_ eq '/?' } @ARGV) { open my $f, '<'
 <small>[`cliHelpLine.pl`](examples/cliHelpLine.pl) · [↑](#languages "Back to languages")</small>
 
 <a id="php"></a>
-### PHP
+#### > PHP
 
 ```php
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -192,7 +196,7 @@ if (array_intersect($argv ?? [], ['--help', '-h', '/?'])) { foreach (file(__FILE
 <small>[`cliHelpLine.php`](examples/cliHelpLine.php) (CLI) · [`cliHelpLine_web.php`](examples/cliHelpLine_web.php) (Web) · [↑](#languages "Back to languages")</small>
 
 <a id="powershell"></a>
-### PowerShell
+#### > PowerShell
 
 ```powershell
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -201,7 +205,7 @@ if ($args | Where-Object { $_ -in '--help','-h','/?' }) { $i=0; Get-Content $MyI
 <small>[`cliHelpLine.ps1`](examples/cliHelpLine.ps1) · [↑](#languages "Back to languages")</small>
 
 <a id="python"></a>
-### Python
+#### > Python
 
 ```python
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -210,7 +214,7 @@ import sys, re; [print(re.sub(r'^# ?', '', line.rstrip('\r\n')) if line.startswi
 <small>[`cliHelpLine.py`](examples/cliHelpLine.py) · [↑](#languages "Back to languages")</small>
 
 <a id="r"></a>
-### R
+#### > R
 
 ```r
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -219,7 +223,7 @@ if (any(commandArgs(trailingOnly=FALSE) %in% c("--help", "-h", "/?"))) { l <- re
 <small>[`cliHelpLine.r`](examples/cliHelpLine.r) · [↑](#languages "Back to languages")</small>
 
 <a id="raku"></a>
-### Raku
+#### > Raku
 
 ```raku
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -228,7 +232,7 @@ if @*ARGS.any eq ('--help' | '-h' | '/?') { for $?FILE.IO.lines { next if .start
 <small>[`cliHelpLine.raku`](examples/cliHelpLine.raku) · [↑](#languages "Back to languages")</small>
 
 <a id="ruby"></a>
-### Ruby
+#### > Ruby
 
 ```ruby
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -237,7 +241,7 @@ if ARGV.any? { |a| %w[--help -h /?].include?(a) }; File.foreach(__FILE__).with_i
 <small>[`cliHelpLine.rb`](examples/cliHelpLine.rb) · [↑](#languages "Back to languages")</small>
 
 <a id="sh"></a>
-### Sh (POSIX Shell)
+#### > Sh (POSIX Shell)
 
 ```sh
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -246,7 +250,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#
 <small>[`cliHelpLine.sh`](examples/cliHelpLine.sh) · [↑](#languages "Back to languages")</small>
 
 <a id="swift"></a>
-### Swift
+#### > Swift
 
 ```swift
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -255,7 +259,7 @@ import Foundation; if CommandLine.arguments.contains(where: { ["--help", "-h", "
 <small>[`cliHelpLine.swift`](examples/cliHelpLine.swift) · [↑](#languages "Back to languages")</small>
 
 <a id="tcl"></a>
-### Tcl
+#### > Tcl
 
 ```tcl
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -264,7 +268,7 @@ if {[expr {[lsearch -exact $argv "--help"] >= 0 || [lsearch -exact $argv "-h"] >
 <small>[`cliHelpLine.tcl`](examples/cliHelpLine.tcl) · [↑](#languages "Back to languages")</small>
 
 <a id="typescript"></a>
-### TypeScript
+#### > TypeScript
 
 ```typescript
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -279,7 +283,7 @@ if (process.argv.some((arg: string) => ['--help', '-h', '/?'].includes(arg))) { 
 <small>[`cliHelpLine.ts`](examples/cliHelpLine.ts) · [↑](#languages "Back to languages")</small>
 
 <a id="zsh"></a>
-### Zsh
+#### > Zsh
 
 ```zsh
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
@@ -287,8 +291,9 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#
 ```
 <small>[`cliHelpLine.zsh`](examples/cliHelpLine.zsh) · [↑](#languages "Back to languages")</small>
 
+<br>
 
-## How It Works & FAQ
+## HOW IT WORKS & FAQ
 
 - **Multi-line header comments:** Write your documentation as a block of comment lines at the top of your script. Each row of the header must start with the language's comment character (`#`, `//`, or `--`) at column 0.
 - **Double-comment delimiter:** The snippet stops reading when it hits the double-comment marker (`##`, `////`, `----`), which acts as the boundary.
@@ -296,7 +301,9 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#
 - **Empty lines & paragraph spacing:** Completely blank lines without any comment characters are ignored. Lines that contain only a comment character (such as `#`, `//`, or `--`, with or without a trailing space) are preserved as empty blank lines in the output, allowing clean paragraph separation.
 - **Subsequent argument parsing:** `cliHelpLine` only intercepts execution when `--help`, `-h`, or `/?` is passed, printing the header and exiting (`exit 0`). For normal runs, it silently falls through, so you can freely perform any further argument parsing right after it.
 
-## Testing & Local Development
+<br>
+
+## TESTING & LOCAL DEVELOPMENT
 
 You can clone the repository to test and run the included example scripts in `examples/`:
 
@@ -321,10 +328,14 @@ A 3-stage multi-language test suite is included to thoroughly verify all scripts
 
 Please give the cliHelpLine project a star ⭐ on GitHub if you find it useful!
 
-## Contributing
+<br>
+
+## CONTRIBUTING
 
 If you want to add support for another scripting language, feel free to open an issue or send a pull request!
 
-## License
+<br>
+
+## LICENSE
 
 This project is licensed under the [MIT License](LICENSE) — feel free to copy, modify, distribute, and include these snippets in any project, whether personal, open-source, or commercial.

@@ -364,7 +364,7 @@ extract_readme_snippet() {
     awk -v lang="$lang" '
         BEGIN { in_code_section = 0; in_block = 0; count = 0 }
         { sub(/\r$/, "") }
-        /^## Code to use/ { in_code_section = 1 }
+        tolower($0) ~ "^(>[[:space:]]*)?#{2,3} code to use" { in_code_section = 1; next }
         in_code_section && tolower($0) ~ "^```" tolower(lang) "$" { in_block = 1; next }
         in_block && /^```/ { exit }
         in_block && count < 2 { print; count++ }

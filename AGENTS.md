@@ -87,14 +87,14 @@ When invoking command-line runners in test scripts (especially `npx tsx`), alway
 
 ### F. README Structure & Navigation Rules
 1. **Alphabetical Ordering:**
-   All 24 language sections in `README.md` under `## Code to use` must be sorted strictly alphabetically from A to Z (with `Batch` positioned between `Bash` and `Crystal`, and `Sh (POSIX Shell)` positioned under **S** between `Ruby` and `Swift`).
+   All 24 language sections in `README.md` under `## CODE TO USE` must be sorted strictly alphabetically from A to Z (with `Batch` positioned between `Bash` and `Crystal`, and `Sh (POSIX Shell)` positioned under **S** between `Ruby` and `Swift`).
 2. **Quick-Jump Index Bar:**
-   Located at `<a id="languages"></a>` directly beneath `## Code to use`. Contains clean links to each language anchor:
+   Located at `<a id="languages"></a>` directly beneath `## CODE TO USE`. Contains clean links to each language anchor:
    `> [AWK](#awk) · [Bash](#bash) · [Batch](#batch) · ... · [Zsh](#zsh)`
 3. **Explicit HTML Anchors:**
-   Place `<a id="<lang>"></a>` directly above each `### <LanguageName>` heading. This guarantees navigation works consistently regardless of Markdown engine slugification.
+   Place `<a id="<lang>"></a>` directly above each `#### > <LanguageName>` heading. This guarantees navigation works consistently regardless of Markdown engine slugification.
 4. **Clean Headings:**
-   Keep headings clean text without large inline URLs or hyperlinks (e.g. `### Bash`, NOT `### Bash · [link](...)`).
+   Keep headings formatted with sub-level chevrons and language names without large inline URLs or hyperlinks (e.g. `#### > Bash`, NOT `#### > Bash · [link](...)`).
 5. **Compact Footers with Up-Arrow Return:**
    Immediately following each code block (or following any language-specific tip block), include a single `<small>` footer combining the example link and an up-arrow return to the index:
    ```markdown
@@ -276,7 +276,7 @@ When adding language #18+:
    - Runnable code block printing `"Hello world!"`.
 2. **Update `README.md`:**
    - Add language link to the alphabetical jump bar under `## Code to use`.
-   - Add `<a id="<lang>"></a>` and `### <LanguageName>` in alphabetical position.
+   - Add `<a id="<lang>"></a>` and `#### > <LanguageName>` in alphabetical position.
    - Add the exact 2-line code block in fenced syntax (```` ```<lang> ````).
    - Add footer link: `<small>[`cliHelpLine.<ext>`](examples/cliHelpLine.<ext>) · [↑](#languages "Back to languages")</small>`.
    - Update total language count in header / summary text if applicable.
