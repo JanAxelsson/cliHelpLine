@@ -9,8 +9,7 @@
 
 In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help is effortless: the comments at the top of a file automatically become the documentation. `cliHelpLine` brings that exact zero-overhead pattern to Bash, Python, Node.js, Ruby, TypeScript, Julia, Swift, and many other scripting languages—no heavyweight CLI frameworks or argument-parsing libraries required.
 
-<!-- Optional: Demo GIF can be embedded here -->
-<!-- ![cliHelpLine Demo](demo.gif) -->
+![cliHelpLine Demo](assets/demo.gif)
 
 <br>
 
