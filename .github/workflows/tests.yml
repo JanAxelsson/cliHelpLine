@@ -85,7 +85,7 @@ jobs:
       - name: Install macOS runtimes via Homebrew & npm
         run: |
           brew install gawk fish lua php r julia
-          npm install -g tsx
+          npm install -g tsx bun
 
       - name: Run native macOS tests
         id: step_macos

@@ -17,15 +17,38 @@ YELLOW="\033[0;33m"
 RESET="\033[0m"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Ensure standard binary locations are always accessible
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 README_FILE="$PROJECT_ROOT/README.md"
+
+# Extract the binary command expected by the script's shebang line (if any)
+get_shebang_cmd() {
+    local file="$1"
+    local first_line
+    first_line=$(head -n 1 "$file")
+    case "$first_line" in
+        '#!'*)
+            local line="${first_line#\#!}"
+            line="${line#"${line%%[![:space:]]*}"}"
+            if [[ "$line" =~ /?env[[:space:]]+(-S[[:space:]]+)?([^[:space:]]+) ]]; then
+                echo "${BASH_REMATCH[2]}"
+            else
+                basename "${line%% *}"
+            fi
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+}
 
 # Function to execute a script directly via shebang
 run_script_direct() {
     local target="$1"
     shift
-    local env_path="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
-    PATH="$env_path" RUBYOPT="--disable-gems" CLANG_MODULE_CACHE_PATH="${TMPDIR:-/tmp}/swift-cache" "$target" "$@" < /dev/null 2>/dev/null
+    RUBYOPT="--disable-gems" CLANG_MODULE_CACHE_PATH="${TMPDIR:-/tmp}/swift-cache" "$target" "$@" < /dev/null 2>/dev/null
 }
 
 # Function to execute a script using its language command first
@@ -33,76 +56,68 @@ run_script_cmd() {
     local target="$1"
     shift
     local ext="${target##*.}"
-    local env_path="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
-    local output
 
     case "$ext" in
         bash)
-            PATH="$env_path" bash "$target" "$@" < /dev/null 2>/dev/null ;;
+            bash "$target" "$@" < /dev/null 2>/dev/null ;;
         sh)
-            PATH="$env_path" sh "$target" "$@" < /dev/null 2>/dev/null ;;
+            sh "$target" "$@" < /dev/null 2>/dev/null ;;
         zsh)
-            PATH="$env_path" zsh "$target" "$@" < /dev/null 2>/dev/null ;;
+            zsh "$target" "$@" < /dev/null 2>/dev/null ;;
         fish)
-            PATH="$env_path" fish "$target" "$@" < /dev/null 2>/dev/null ;;
+            fish "$target" "$@" < /dev/null 2>/dev/null ;;
         py)
-            if command -v python3 >/dev/null 2>&1 && output=$(PATH="$env_path" python3 "$target" "$@" < /dev/null 2>/dev/null); then
-                printf "%s\n" "$output"
-            elif [ -x /opt/homebrew/bin/python3 ]; then
-                PATH="$env_path" /opt/homebrew/bin/python3 "$target" "$@" < /dev/null 2>/dev/null
-            elif [ -x /usr/bin/python3 ]; then
-                PATH="$env_path" /usr/bin/python3 "$target" "$@" < /dev/null 2>/dev/null
+            if command -v python3 >/dev/null 2>&1; then
+                python3 "$target" "$@" < /dev/null 2>/dev/null
             elif command -v python >/dev/null 2>&1; then
-                PATH="$env_path" python "$target" "$@" < /dev/null 2>/dev/null
+                python "$target" "$@" < /dev/null 2>/dev/null
             fi ;;
         js|mjs|cjs)
-            if command -v node >/dev/null 2>&1 && output=$(PATH="$env_path" node "$target" "$@" < /dev/null 2>/dev/null); then
-                printf "%s\n" "$output"
-            elif [ -x /usr/local/bin/node ]; then
-                PATH="$env_path" /usr/local/bin/node "$target" "$@" < /dev/null 2>/dev/null
-            elif [ -x /opt/homebrew/bin/node ]; then
-                PATH="$env_path" /opt/homebrew/bin/node "$target" "$@" < /dev/null 2>/dev/null
-            fi ;;
+            node "$target" "$@" < /dev/null 2>/dev/null ;;
         rb)
-            PATH="$env_path" RUBYOPT="--disable-gems" ruby --disable-gems "$target" "$@" < /dev/null 2>/dev/null ;;
+            RUBYOPT="--disable-gems" ruby --disable-gems "$target" "$@" < /dev/null 2>/dev/null ;;
         pl)
-            PATH="$env_path" perl "$target" "$@" < /dev/null 2>/dev/null ;;
+            perl "$target" "$@" < /dev/null 2>/dev/null ;;
         php)
-            PATH="$env_path" php "$target" "$@" < /dev/null 2>/dev/null ;;
+            php "$target" "$@" < /dev/null 2>/dev/null ;;
         lua)
-            PATH="$env_path" lua "$target" "$@" < /dev/null 2>/dev/null || PATH="$env_path" lua5.4 "$target" "$@" < /dev/null 2>/dev/null ;;
+            if command -v lua >/dev/null 2>&1; then
+                lua "$target" "$@" < /dev/null 2>/dev/null
+            else
+                lua5.4 "$target" "$@" < /dev/null 2>/dev/null
+            fi ;;
         r|R)
-            PATH="$env_path" Rscript "$target" "$@" < /dev/null 2>/dev/null ;;
+            Rscript "$target" "$@" < /dev/null 2>/dev/null ;;
         ps1)
-            PATH="$env_path" pwsh -NoProfile -File "$target" "$@" < /dev/null 2>/dev/null ;;
+            pwsh -NoProfile -File "$target" "$@" < /dev/null 2>/dev/null ;;
         tcl)
-            PATH="$env_path" tclsh "$target" "$@" < /dev/null 2>/dev/null ;;
+            tclsh "$target" "$@" < /dev/null 2>/dev/null ;;
         awk)
             if command -v gawk >/dev/null 2>&1; then
-                PATH="$env_path" gawk -E "$target" "$@" < /dev/null 2>/dev/null
+                gawk -E "$target" "$@" < /dev/null 2>/dev/null
             elif command -v awk >/dev/null 2>&1; then
                 if [ "$#" -gt 0 ]; then
-                    PATH="$env_path" awk -f "$target" -- "$@" < /dev/null 2>/dev/null
+                    awk -f "$target" -- "$@" < /dev/null 2>/dev/null
                 else
-                    PATH="$env_path" awk -f "$target" < /dev/null 2>/dev/null
+                    awk -f "$target" < /dev/null 2>/dev/null
                 fi
             fi ;;
         ts)
-            if command -v bun >/dev/null 2>&1 && output=$(PATH="$env_path" bun run "$target" "$@" < /dev/null 2>/dev/null); then
-                printf "%s\n" "$output"
-            elif command -v tsx >/dev/null 2>&1 && output=$(PATH="$env_path" tsx "$target" "$@" < /dev/null 2>/dev/null); then
-                printf "%s\n" "$output"
-            elif command -v deno >/dev/null 2>&1 && output=$(PATH="$env_path" deno run --allow-read "$target" "$@" < /dev/null 2>/dev/null); then
-                printf "%s\n" "$output"
-            elif command -v ts-node >/dev/null 2>&1 && output=$(PATH="$env_path" ts-node --transpile-only "$target" "$@" < /dev/null 2>/dev/null); then
-                printf "%s\n" "$output"
-            elif command -v node >/dev/null 2>&1 && output=$(PATH="$env_path" node --experimental-strip-types "$target" "$@" < /dev/null 2>/dev/null); then
-                printf "%s\n" "$output"
+            if command -v bun >/dev/null 2>&1; then
+                bun run "$target" "$@" < /dev/null 2>/dev/null
+            elif command -v tsx >/dev/null 2>&1; then
+                tsx "$target" "$@" < /dev/null 2>/dev/null
+            elif command -v deno >/dev/null 2>&1; then
+                deno run --allow-read "$target" "$@" < /dev/null 2>/dev/null
+            elif command -v ts-node >/dev/null 2>&1; then
+                ts-node --transpile-only "$target" "$@" < /dev/null 2>/dev/null
+            elif command -v node >/dev/null 2>&1; then
+                node --experimental-strip-types "$target" "$@" < /dev/null 2>/dev/null
             fi ;;
         jl)
-            PATH="$env_path" julia "$target" "$@" < /dev/null 2>/dev/null ;;
+            julia "$target" "$@" < /dev/null 2>/dev/null ;;
         swift)
-            PATH="$env_path" swift -module-cache-path "${TMPDIR:-/tmp}/swift-cache" "$target" "$@" < /dev/null 2>/dev/null ;;
+            swift -module-cache-path "${TMPDIR:-/tmp}/swift-cache" "$target" "$@" < /dev/null 2>/dev/null ;;
         *)
             "$target" "$@" < /dev/null 2>/dev/null ;;
     esac
@@ -413,7 +428,8 @@ if [ "${#files[@]}" -eq 0 ]; then
     exit 1
 fi
 
-total_count=0
+total_run=0
+pass_count=0
 fail_count=0
 skip_count=0
 
@@ -437,14 +453,14 @@ if [ "$RUN_DIRECT" -eq 1 ]; then
             continue
         fi
 
-        if ! is_interpreter_available "$target"; then
-            interp=$(get_interpreter_name "$target")
-            direct_skipped+=("$target_name ('$interp' not installed)")
+        shebang_cmd=$(get_shebang_cmd "$target")
+        if [ -n "$shebang_cmd" ] && ! command -v "$shebang_cmd" >/dev/null 2>&1; then
+            direct_skipped+=("$target_name ('$shebang_cmd' not installed)")
             skip_count=$((skip_count + 1))
             continue
         fi
 
-        total_count=$((total_count + 1))
+        total_run=$((total_run + 1))
 
         # 1. Help output verification: --help must match header comments and stop
         extract_expected_help "$target" > "$expected_tmp"
@@ -468,6 +484,7 @@ if [ "$RUN_DIRECT" -eq 1 ]; then
             continue
         fi
 
+        pass_count=$((pass_count + 1))
         printf "${GREEN}[ OK ]${RESET} ./%s\n" "$target_name"
     done
     if [ "${#direct_skipped[@]}" -gt 0 ]; then
@@ -492,7 +509,7 @@ if [ "$RUN_CMD" -eq 1 ]; then
         fi
 
         cmd_display=$(get_command_display "$target")
-        total_count=$((total_count + 1))
+        total_run=$((total_run + 1))
 
         # 1. Help output verification: --help must match header comments and stop
         extract_expected_help "$target" > "$expected_tmp"
@@ -516,6 +533,7 @@ if [ "$RUN_CMD" -eq 1 ]; then
             continue
         fi
 
+        pass_count=$((pass_count + 1))
         printf "${GREEN}[ OK ]${RESET} %s %s\n" "$cmd_display" "$target_name"
     done
     if [ "${#cmd_skipped[@]}" -gt 0 ]; then
@@ -525,7 +543,7 @@ if [ "$RUN_CMD" -eq 1 ]; then
     echo ""
 fi
 
-# --- Part 2: Verify comment + one-liner against README.md ---
+# --- Part 3: Verify comment + one-liner against README.md ---
 if [ "$RUN_README" -eq 1 ]; then
     echo "--- Verifying 2-line code snippet against README.md "
     if [ ! -f "$README_FILE" ]; then
@@ -533,7 +551,7 @@ if [ "$RUN_README" -eq 1 ]; then
         fail_count=$((fail_count + 1))
     else
         for target in "${files[@]}"; do
-            total_count=$((total_count + 1))
+            total_run=$((total_run + 1))
             target_name="$(basename "$target")"
             lang=$(lang_for_file "$target")
             cc=$(get_comment_char "$target")
@@ -546,6 +564,7 @@ if [ "$RUN_README" -eq 1 ]; then
                 printf "${RED}[FAIL]${RESET} %s (missing code block for '%s' in README.md)\n" "$target_name" "$lang"
                 fail_count=$((fail_count + 1))
             elif cmp -s "$script_snip_tmp" "$readme_snip_tmp"; then
+                pass_count=$((pass_count + 1))
                 printf "${GREEN}[ OK ]${RESET} %s <-> README.md (%s)\n" "$target_name" "$lang"
             else
                 printf "${RED}[FAIL]${RESET} %s <-> README.md (%s)\n" "$target_name" "$lang"
@@ -561,16 +580,16 @@ fi
 echo ""
 if [ "$fail_count" -eq 0 ]; then
     if [ "$skip_count" -gt 0 ]; then
-        printf "${GREEN}All available tests passed ($((total_count - skip_count))/$((total_count - skip_count)))${RESET}\n"
+        printf "${GREEN}All available tests passed ($pass_count/$pass_count)${RESET}\n"
     else
-        printf "${GREEN}All tests passed ($total_count/$total_count)${RESET}\n"
+        printf "${GREEN}All tests passed ($pass_count/$pass_count)${RESET}\n"
     fi
     exit 0
 else
     if [ "$skip_count" -gt 0 ]; then
-        printf "${RED}$fail_count of $total_count tests failed ($skip_count skipped)${RESET}\n"
+        printf "${RED}$fail_count of $total_run tests failed ($skip_count skipped)${RESET}\n"
     else
-        printf "${RED}$fail_count of $total_count tests failed${RESET}\n"
+        printf "${RED}$fail_count of $total_run tests failed${RESET}\n"
     fi
     exit 1
 fi

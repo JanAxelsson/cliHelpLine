@@ -95,6 +95,12 @@ When invoking command-line runners in test scripts (especially `npx tsx`), alway
 6. **Byte-for-Byte Synchronization:**
    Test 3 extracts the 2-line code blocks from `README.md` and verifies that they match the respective files in `examples/` byte-for-byte.
 
+### G. Shebang Execution & Runtime Resolution
+- **Direct Shebang Inspection:** When testing direct execution (`./cliHelpLine.<ext>`), `tests/test_cliHelpLine.sh` inspects the script's line 1 shebang using `get_shebang_cmd` to determine the exact required binary (e.g. `gawk` for AWK, `bun` for TypeScript, `pwsh` for PowerShell). If the binary is not present on the host or container, the test is cleanly reported under `Skipped:` rather than triggering a false failure.
+- **TypeScript & Bun:** `examples/cliHelpLine.ts` uses `#!/usr/bin/env bun`. Both Docker (`tests/Dockerfile`) and macOS CI (`.github/workflows/tests.yml`) install `bun` via `npm install -g tsx bun` so that both direct shebang execution and language command execution run cleanly.
+- **Lua Compatibility in Debian:** Debian packages Lua as `lua5.4` (`/usr/bin/lua5.4`). `tests/Dockerfile` creates a symlink `ln -sf /usr/bin/lua5.4 /usr/local/bin/lua` so that `#!/usr/bin/env lua` succeeds without failing.
+- **Accurate Counting:** Test counting uses independent `total_run`, `pass_count`, `fail_count`, and `skip_count` variables to ensure test summaries remain mathematically accurate across subsets and skipped tests.
+
 ---
 
 ## 4. Testing Architecture (3 Stages)
@@ -153,13 +159,13 @@ Automated CI runs on every push and pull request across all branches via `.githu
 #### The 4 Jobs Explained:
 1. **`test-docker-and-readme` (Linux `ubuntu-latest`):**
    - **Docker Buildx Cache:** Uses GitHub Actions cache (`type=gha`) to cache the `clihelpline-tester` Docker image layers, speeding up builds to seconds.
-   - **Stage 1 (Docker Full Suite):** Runs `tests/test_cliHelpLine.sh --help-only` inside the Docker container, testing all 16 Linux runtimes for both `--help` output and normal execution (`"Hello world!"`).
+   - **Stage 1 (Docker Full Suite):** Runs `tests/test_cliHelpLine.sh --help-only` inside the Docker container, testing all 16 Linux runtimes for direct shebang execution, language command execution, and normal execution (`"Hello world!"`). Container includes `lua` symlink (`/usr/local/bin/lua -> /usr/bin/lua5.4`) and npm packages `tsx` and `bun`.
    - **Stage 2 (README Sync):** Runs `tests/test_cliHelpLine.sh --readme-only` on the host, verifying all 17 language snippets against `README.md` byte-for-byte.
    - **Output Passing:** Emits stripped text results directly to job outputs (`$GITHUB_OUTPUT`) in memory without creating fragile blob zip artifacts.
 
 2. **`test-macos` (macOS `macos-latest`):**
    - **Native Darwin Runner:** Executes on Apple Silicon (M-series) macOS hardware.
-   - **Homebrew Setup:** Installs `gawk`, `fish`, `lua`, `php`, and `r` via Homebrew (`pwsh`, `python3`, `node`, `ruby`, `perl`, `bash`, `zsh`, `swift` are native/pre-installed).
+   - **Homebrew & npm Setup:** Installs `gawk`, `fish`, `lua`, `php`, `r`, and `julia` via Homebrew, and `tsx` and `bun` via npm (`pwsh`, `python3`, `node`, `ruby`, `perl`, `bash`, `zsh`, `swift` are native/pre-installed).
    - **Stage 3 (macOS Native Tests):** Runs `tests/test_cliHelpLine.sh --help-only` directly on Darwin, guaranteeing BSD `sed`, `gawk`, Swift, and macOS permission compatibility. Does **not** re-run README sync (avoids test duplication).
    - **Output Passing:** Emits results to `$GITHUB_OUTPUT`.
 

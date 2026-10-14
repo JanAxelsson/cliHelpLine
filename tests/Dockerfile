@@ -24,10 +24,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lua5.4 \
     r-base-core \
     tcl \
+    && ln -sf /usr/bin/lua5.4 /usr/local/bin/lua \
     && rm -rf /var/lib/apt/lists/*
 
-# Install TypeScript runner (tsx)
-RUN npm install -g tsx && npm cache clean --force
+# Install TypeScript runners (tsx, bun)
+RUN npm install -g tsx bun && npm cache clean --force
 
 # Install Julia (multi-arch arm64 / amd64 official binaries)
 RUN ARCH=$(dpkg --print-architecture) && \
