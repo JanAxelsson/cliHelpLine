@@ -140,6 +140,8 @@ run_script_cmd() {
             groovy "$target" "$@" < /dev/null 2>/dev/null ;;
         nim)
             nim r --hints:off "$target" "$@" < /dev/null 2>/dev/null ;;
+        raku)
+            raku "$target" "$@" < /dev/null 2>/dev/null ;;
         *)
             "$target" "$@" < /dev/null 2>/dev/null ;;
     esac
@@ -177,6 +179,7 @@ is_interpreter_available() {
         exs)  command -v elixir >/dev/null 2>&1 ;;
         groovy) command -v groovy >/dev/null 2>&1 ;;
         nim)  command -v nim >/dev/null 2>&1 ;;
+        raku) command -v raku >/dev/null 2>&1 ;;
         *)    return 0 ;;
     esac
 }
@@ -211,6 +214,7 @@ get_command_display() {
         exs)  echo "elixir" ;;
         groovy) echo "groovy" ;;
         nim)  echo "nim r" ;;
+        raku) echo "raku" ;;
         ts)
             if command -v bun >/dev/null 2>&1; then echo "bun";
             elif command -v tsx >/dev/null 2>&1; then echo "tsx";
@@ -243,6 +247,7 @@ lang_for_file() {
         exs)        echo "elixir" ;;
         groovy)     echo "groovy" ;;
         nim)        echo "nim" ;;
+        raku)       echo "raku" ;;
         ts)         echo "typescript" ;;
         jl)         echo "julia" ;;
         swift)      echo "swift" ;;

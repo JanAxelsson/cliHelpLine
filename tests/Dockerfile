@@ -1,5 +1,5 @@
 # Dockerfile for cliHelpLine multi-language test environment
-# Supports: Bash, POSIX Sh, Zsh, Fish, Python 3, Node.js, TypeScript, Ruby, Perl, PHP, Lua, R, PowerShell Core, Tcl, AWK, Julia, Crystal, Dart, Elixir, Groovy, Nim
+# Supports: Bash, POSIX Sh, Zsh, Fish, Python 3, Node.js, TypeScript, Ruby, Perl, PHP, Lua, R, PowerShell Core, Tcl, AWK, Julia, Crystal, Dart, Elixir, Groovy, Nim, Raku
 FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     elixir \
     groovy \
     nim \
+    rakudo \
     gcc \
     pkg-config \
     libevent-dev \

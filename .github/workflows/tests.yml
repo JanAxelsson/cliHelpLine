@@ -9,7 +9,7 @@ on:
 
 jobs:
   # ============================================================
-  # 1. Linux Job: Docker test suite (21 Linux languages) & README sync
+  # 1. Linux Job: Docker test suite (22 Linux languages) & README sync
   # ============================================================
   test-docker-and-readme:
     name: Linux (Docker & README Sync)
@@ -35,7 +35,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Run Docker test suite (All 21 Linux languages)
+      - name: Run Docker test suite (All 22 Linux languages)
         id: step_docker
         run: |
           set +e
@@ -84,7 +84,7 @@ jobs:
 
       - name: Install macOS runtimes via Homebrew & npm
         run: |
-          brew install gawk fish lua php r julia elixir groovy nim crystal
+          brew install gawk fish lua php r julia elixir groovy nim crystal rakudo
           npm install -g tsx bun
 
       - name: Run native macOS tests

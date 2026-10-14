@@ -5,9 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **Turn your script's header comments into `--help`, `-h`, and `/?` output with a 2-line snippet.**  
-> Zero dependencies, zero boilerplate, and cross-platform across 22 scripting languages.
+> Zero dependencies, zero boilerplate, and cross-platform across 23 scripting languages.
 
-In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help is effortless: the comments at the top of a file automatically become the documentation. `cliHelpLine` brings that exact zero-overhead pattern to Bash, Python, Node.js, Ruby, TypeScript, Julia, Swift, and 15 other languages—no heavyweight CLI frameworks or argument-parsing libraries required.
+In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help is effortless: the comments at the top of a file automatically become the documentation. `cliHelpLine` brings that exact zero-overhead pattern to Bash, Python, Node.js, Ruby, TypeScript, Julia, Swift, and 16 other languages—no heavyweight CLI frameworks or argument-parsing libraries required.
 
 <!-- Optional: Demo GIF can be embedded here -->
 <!-- ![cliHelpLine Demo](demo.gif) -->
@@ -47,7 +47,7 @@ Usage: ./backup.sh <source> <target>
 - **Single Source of Truth:** Your documentation lives inside the code comments at the very top of your file.
 - **Cross-Platform:** Works out-of-the-box with Unix `--help` and `-h`, as well as Windows `/?`.
 - **Compatible with Further Argument Parsing:** Only intercepts help requests; silently falls through for normal runs so you can still parse other arguments as usual.
-- **Multi-Language:** Works seamlessly across 22 scripting languages.
+- **Multi-Language:** Works seamlessly across 23 scripting languages.
 
 ## Code to use
 
@@ -55,7 +55,7 @@ Copy and paste the two lines corresponding to your programming language right af
 
 <a id="languages"></a>
 > **Jump to:**  
-> [AWK](#awk) · [Bash](#bash) · [Crystal](#crystal) · [Dart](#dart) · [Elixir](#elixir) · [Fish](#fish) · [Groovy](#groovy) · [JavaScript](#javascript) · [Julia](#julia) · [Lua](#lua) · [Nim](#nim) · [Perl](#perl) · [PHP](#php) · [PowerShell](#powershell) · [Python](#python) · [R](#r) · [Ruby](#ruby) · [Sh](#sh) · [Swift](#swift) · [Tcl](#tcl) · [TypeScript](#typescript) · [Zsh](#zsh)
+> [AWK](#awk) · [Bash](#bash) · [Crystal](#crystal) · [Dart](#dart) · [Elixir](#elixir) · [Fish](#fish) · [Groovy](#groovy) · [JavaScript](#javascript) · [Julia](#julia) · [Lua](#lua) · [Nim](#nim) · [Perl](#perl) · [PHP](#php) · [PowerShell](#powershell) · [Python](#python) · [R](#r) · [Raku](#raku) · [Ruby](#ruby) · [Sh](#sh) · [Swift](#swift) · [Tcl](#tcl) · [TypeScript](#typescript) · [Zsh](#zsh)
 
 <a id="awk"></a>
 ### AWK
@@ -188,6 +188,14 @@ import sys, re; [print(re.sub(r'^# ?', '', line.rstrip('\r\n')) if line.startswi
 if (any(commandArgs(trailingOnly=FALSE) %in% c("--help", "-h", "/?"))) { l <- readLines(sub("^--file=", "", grep("^--file=", commandArgs(trailingOnly=FALSE), value=TRUE)[1]), warn=FALSE); for (x in l[-1]) { if (startsWith(x, "##")) break; if (startsWith(x, "#") || nzchar(trimws(x))) cat(sub("^# ?", "", x), "\n", sep=""); }; quit(save="no", status=0); }
 ```
 <small>[`cliHelpLine.r`](examples/cliHelpLine.r) · [↑](#languages "Back to languages")</small>
+
+<a id="raku"></a>
+### Raku
+```raku
+## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
+if @*ARGS.any eq ('--help' | '-h' | '/?') { for $?FILE.IO.lines { next if .starts-with('#!'); last if .starts-with('##'); say .starts-with('#') ?? .subst(/^ '#' ' '? /, '') !! $_ if .starts-with('#') || .trim ne ''; }; exit 0; }
+```
+<small>[`cliHelpLine.raku`](examples/cliHelpLine.raku) · [↑](#languages "Back to languages")</small>
 
 <a id="ruby"></a>
 ### Ruby
