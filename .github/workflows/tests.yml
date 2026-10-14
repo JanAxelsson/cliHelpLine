@@ -93,6 +93,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Dart SDK
+        uses: dart-lang/setup-dart@v1
+
       - name: Get current year and week
         id: cache-key
         run: echo "week=$(date +'%Y-%U')" >> "$GITHUB_OUTPUT"
