@@ -12,6 +12,7 @@ In environments like MATLAB and PowerShell (*Comment-Based Help*), writing help 
 <!-- Optional: Demo GIF can be embedded here -->
 <!-- ![cliHelpLine Demo](demo.gif) -->
 
+  
 ## Quick Example
 
 1. In your script (e.g. `backup.sh`), write your header comments followed by the 2-line snippet:
@@ -41,6 +42,7 @@ backup.sh - Quick directory backup tool
 Usage: ./backup.sh <source> <target>
 ```
 
+  
 ## Features
 
 - **Zero Boilerplate:** Say goodbye to complex argument parsing libraries just to print a help message.
@@ -59,6 +61,7 @@ Copy and paste the two lines corresponding to your programming language right af
 
 <a id="awk"></a>
 ### AWK
+
 ```awk
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO["argv"]) if (PROCINFO["argv"][a] ~ /^-[fE]$/) f=PROCINFO["argv"][a+1]; while ((getline l < f) > 0) { if (++nr == 1 && l ~ /^#!/ ) continue; if (l ~ /^##/) break; if (l ~ /^#/ || l ~ /\S/) { sub(/^# ?/, "", l); print l } } exit 0 } }
@@ -69,6 +72,7 @@ BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO
 
 <a id="bash"></a>
 ### Bash
+
 ```bash
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
@@ -77,6 +81,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#
 
 <a id="batch"></a>
 ### Batch (.bat)
+
 ```bat
 REM REM Help -- prints header above (stops at 'REM REM')  (see https://github.com/JanAxelsson/cliHelpLine)
 (for %%H in (--help -h) do if /i "%~1"=="%%~H" set "_h=1") & (if "%~1"=="/?" set "_h=1") & if defined _h (powershell -NoProfile -Command "Get-Content '%~f0' | ForEach-Object { if ($_ -match '^REM REM') { exit 0 }; if ($_ -match '^REM') { $_ -replace '^REM ?','' } }" & exit /b 0)
@@ -87,6 +92,7 @@ REM REM Help -- prints header above (stops at 'REM REM')  (see https://github.co
 
 <a id="crystal"></a>
 ### Crystal
+
 ```crystal
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (ARGV & ["--help", "-h", "/?"]).any?; File.each_line(__FILE__) { |l| next if l.starts_with?("#!"); break if l.starts_with?("##"); puts l.starts_with?("#") ? l.sub(/^# ?/, "") : l if l.starts_with?("#") || !l.strip.empty? }; exit 0; end
@@ -95,6 +101,7 @@ if (ARGV & ["--help", "-h", "/?"]).any?; File.each_line(__FILE__) { |l| next if 
 
 <a id="dart"></a>
 ### Dart
+
 ```dart
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 import 'dart:io'; void main(List<String> a) { if (a.any(['--help', '-h', '/?'].contains)) { for (var l in File(Platform.script.toFilePath()).readAsLinesSync()) { if (l.startsWith('#!')) continue; if (l.startsWith('////')) exit(0); if (l.startsWith('//')) print(l.replaceFirst(RegExp(r'^// ?'), '')); else if (l.trim().isNotEmpty) print(l); }; exit(0); }
@@ -103,6 +110,7 @@ import 'dart:io'; void main(List<String> a) { if (a.any(['--help', '-h', '/?'].c
 
 <a id="elixir"></a>
 ### Elixir
+
 ```elixir
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if Enum.any?(System.argv(), &(&1 in ["--help", "-h", "/?"])), do: (File.stream!(__ENV__.file) |> Enum.reduce_while(nil, fn l, _ -> cond do; String.starts_with?(l, "#!") -> {:cont, nil}; String.starts_with?(l, "##") -> {:halt, nil}; String.starts_with?(l, "#") -> IO.write(Regex.replace(~r/^# ?/, l, "")); {:cont, nil}; String.trim(l) != "" -> IO.write(l); {:cont, nil}; true -> {:cont, nil}; end end); System.halt(0))
@@ -111,6 +119,7 @@ if Enum.any?(System.argv(), &(&1 in ["--help", "-h", "/?"])), do: (File.stream!(
 
 <a id="fish"></a>
 ### Fish
+
 ```fish
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if contains -- "$argv[1]" --help -h '/?'; sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' (status filename) | sed '$d'; exit 0; end
@@ -119,6 +128,7 @@ if contains -- "$argv[1]" --help -h '/?'; sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^
 
 <a id="groovy"></a>
 ### Groovy
+
 ```groovy
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (args.any { it in ["--help", "-h", "/?"] }) { new File(getClass().protectionDomain.codeSource.location.path).eachLine { l -> if (l.startsWith("#!")) return; if (l.startsWith("////")) System.exit(0); if (l.startsWith("//")) println(l.replaceFirst("^// ?", "")); else if (l.trim()) println(l) }; System.exit(0) }
@@ -127,6 +137,7 @@ if (args.any { it in ["--help", "-h", "/?"] }) { new File(getClass().protectionD
 
 <a id="javascript"></a>
 ### JavaScript
+
 ```javascript
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every(line => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
@@ -135,6 +146,7 @@ if (process.argv.some(arg => ['--help', '-h', '/?'].includes(arg))) { require('f
 
 <a id="julia"></a>
 ### Julia
+
 ```julia
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if any(in(["--help", "-h", "/?"]), ARGS); for l in eachline(@__FILE__); startswith(l, "#!") && continue; startswith(l, "##") && exit(0); (startswith(l, "#") || !isempty(strip(l))) && println(startswith(l, "#") ? replace(l, r"^# ?"=>"") : l); end; exit(0); end
@@ -143,6 +155,7 @@ if any(in(["--help", "-h", "/?"]), ARGS); for l in eachline(@__FILE__); startswi
 
 <a id="lua"></a>
 ### Lua
+
 ```lua
 ---- Help -- prints header above (stops at '----')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (function(args) for _,a in ipairs(args) do if a=="--help" or a=="-h" or a=="/?" then return true end end return false end)(arg or {}) then local f=io.open(arg[0],"r"); local n=0; for l in f:lines() do n=n+1; if not (n==1 and l:match("^#!")) then if l:match("^%-%-%-%-") then break end if l:match("^%-%-") or l:match("%S") then print((l:gsub("^%-%- ?", ""))) end end end; os.exit(0); end
@@ -151,6 +164,7 @@ if (function(args) for _,a in ipairs(args) do if a=="--help" or a=="-h" or a=="/
 
 <a id="nim"></a>
 ### Nim
+
 ```nim
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 import std/[os, sequtils, strutils]; if ["--help", "-h", "/?"].anyIt(it in commandLineParams()): (for l in currentSourcePath().lines: (if l.startsWith("#!"): continue elif l.startsWith("##"): quit(0) elif l.startsWith("#"): (if l.len > 1 and l[1] == ' ': echo l[2..^1] else: echo l[1..^1]) elif l.strip != "": echo l)); quit(0)
@@ -159,6 +173,7 @@ import std/[os, sequtils, strutils]; if ["--help", "-h", "/?"].anyIt(it in comma
 
 <a id="perl"></a>
 ### Perl
+
 ```perl
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (grep { $_ eq '--help' || $_ eq '-h' || $_ eq '/?' } @ARGV) { open my $f, '<', $0; while (<$f>) { next if $. == 1 && /^#!/; last if /^##/; if (/^#/ || /\S/) { s/^# ?//; print; } } exit 0; }
@@ -167,6 +182,7 @@ if (grep { $_ eq '--help' || $_ eq '-h' || $_ eq '/?' } @ARGV) { open my $f, '<'
 
 <a id="php"></a>
 ### PHP
+
 ```php
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (array_intersect($argv ?? [], ['--help', '-h', '/?'])) { foreach (file(__FILE__) as $i => $l) { if ($i <= 1 && (str_starts_with($l, '#!') || str_starts_with($l, '<?php'))) continue; if (str_starts_with($l, '////')) break; if (str_starts_with($l, '//') || trim($l) !== '') echo preg_replace('/^\/\/ ?/', '', $l); } exit(0); }
@@ -177,6 +193,7 @@ if (array_intersect($argv ?? [], ['--help', '-h', '/?'])) { foreach (file(__FILE
 
 <a id="powershell"></a>
 ### PowerShell
+
 ```powershell
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if ($args | Where-Object { $_ -in '--help','-h','/?' }) { $i=0; Get-Content $MyInvocation.MyCommand.Path | ForEach-Object { $i++; if ($i -eq 1 -and $_ -match '^#!') { return }; if ($_ -match '^##') { break } elseif ($_ -match '^#' -or $_.Trim() -ne '') { $_ -replace '^# ?','' } }; exit 0 }
@@ -185,6 +202,7 @@ if ($args | Where-Object { $_ -in '--help','-h','/?' }) { $i=0; Get-Content $MyI
 
 <a id="python"></a>
 ### Python
+
 ```python
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 import sys, re; [print(re.sub(r'^# ?', '', line.rstrip('\r\n')) if line.startswith('#') else line.rstrip('\r\n')) for line in open(__file__, encoding='utf-8') if not line.startswith('#!') and (not line.startswith('##') or sys.exit(0)) and (line.startswith('#') or line.strip())] if any(arg in sys.argv for arg in ('--help', '-h', '/?')) else None  # noqa
@@ -193,6 +211,7 @@ import sys, re; [print(re.sub(r'^# ?', '', line.rstrip('\r\n')) if line.startswi
 
 <a id="r"></a>
 ### R
+
 ```r
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (any(commandArgs(trailingOnly=FALSE) %in% c("--help", "-h", "/?"))) { l <- readLines(sub("^--file=", "", grep("^--file=", commandArgs(trailingOnly=FALSE), value=TRUE)[1]), warn=FALSE); for (x in l[-1]) { if (startsWith(x, "##")) break; if (startsWith(x, "#") || nzchar(trimws(x))) cat(sub("^# ?", "", x), "\n", sep=""); }; quit(save="no", status=0); }
@@ -201,6 +220,7 @@ if (any(commandArgs(trailingOnly=FALSE) %in% c("--help", "-h", "/?"))) { l <- re
 
 <a id="raku"></a>
 ### Raku
+
 ```raku
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if @*ARGS.any eq ('--help' | '-h' | '/?') { for $?FILE.IO.lines { next if .starts-with('#!'); last if .starts-with('##'); say .starts-with('#') ?? .subst(/^ '#' ' '? /, '') !! $_ if .starts-with('#') || .trim ne ''; }; exit 0; }
@@ -209,6 +229,7 @@ if @*ARGS.any eq ('--help' | '-h' | '/?') { for $?FILE.IO.lines { next if .start
 
 <a id="ruby"></a>
 ### Ruby
+
 ```ruby
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if ARGV.any? { |a| %w[--help -h /?].include?(a) }; File.foreach(__FILE__).with_index { |l, i| next if i == 0 && l.start_with?('#!'); break if l.start_with?('##'); puts l.sub(/^# ?/, '').chomp if l.start_with?('#') || !l.strip.empty? }; exit 0; end
@@ -217,6 +238,7 @@ if ARGV.any? { |a| %w[--help -h /?].include?(a) }; File.foreach(__FILE__).with_i
 
 <a id="sh"></a>
 ### Sh (POSIX Shell)
+
 ```sh
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
@@ -225,6 +247,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#
 
 <a id="swift"></a>
 ### Swift
+
 ```swift
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 import Foundation; if CommandLine.arguments.contains(where: { ["--help", "-h", "/?"].contains($0) }) { for line in (try? String(contentsOfFile: #file, encoding: .utf8))?.components(separatedBy: .newlines) ?? [] { if line.hasPrefix("#!") { continue }; if line.hasPrefix("////") { exit(0) }; if line.hasPrefix("//") { print(line.dropFirst(line.hasPrefix("// ") ? 3 : 2)) } else if !line.trimmingCharacters(in: .whitespaces).isEmpty { print(line) } }; exit(0) }
@@ -233,6 +256,7 @@ import Foundation; if CommandLine.arguments.contains(where: { ["--help", "-h", "
 
 <a id="tcl"></a>
 ### Tcl
+
 ```tcl
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if {[expr {[lsearch -exact $argv "--help"] >= 0 || [lsearch -exact $argv "-h"] >= 0 || [lsearch -exact $argv "/?"] >= 0}]} { set fp [open $argv0 r]; set nr 0; while {[gets $fp line] >= 0} { incr nr; if {$nr == 1 && [string match "#!*" $line]} continue; if {[string match "##*" $line]} break; if {[string match "#*" $line] || [string trim $line] ne ""} { puts [regsub {^# ?} $line ""] } }; close $fp; exit 0 }
@@ -241,6 +265,7 @@ if {[expr {[lsearch -exact $argv "--help"] >= 0 || [lsearch -exact $argv "-h"] >
 
 <a id="typescript"></a>
 ### TypeScript
+
 ```typescript
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (process.argv.some((arg: string) => ['--help', '-h', '/?'].includes(arg))) { require('fs').readFileSync(__filename, 'utf-8').split(/\r?\n/).every((line: string) => line.startsWith('#!') ? true : (line.startsWith('////') ? false : ((line.startsWith('//') || line.trim() !== '') && console.log(line.startsWith('//') ? line.replace(/^\/\/ ?/, '') : line), true))); process.exit(0); }
@@ -255,6 +280,7 @@ if (process.argv.some((arg: string) => ['--help', '-h', '/?'].includes(arg))) { 
 
 <a id="zsh"></a>
 ### Zsh
+
 ```zsh
 ## Help -- prints header above (stops at '##')  (see https://github.com/JanAxelsson/cliHelpLine)
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
