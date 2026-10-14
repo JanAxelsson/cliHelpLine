@@ -10,12 +10,12 @@ cat << EOF
 ${DOCKER_OUT:-No output available}
 
 ====================================================================
-=== Stage 2/4: Sync with README.md (All 23 Languages)
+=== Stage 2/4: Sync with README.md (All 24 Languages)
 ====================================================================
 ${README_OUT:-No output available}
 
 ====================================================================
-=== Stage 3/4: macOS Tests (Darwin Host - All 23 Languages)
+=== Stage 3/4: macOS Tests (Darwin Host - All 24 Languages)
 ====================================================================
 ${MACOS_OUT:-No output available}
 
@@ -28,9 +28,9 @@ ${WINDOWS_OUT:-No output available}
                      TOTAL TEST SUMMARY                         
 ================================================================
   [ OK ] Stage 1: Docker tests (Linux container)
-  [ OK ] Stage 2: README.md synchronization (23/23 languages)
-  [ OK ] Stage 3: macOS Darwin tests (23/23 languages)
-  [ OK ] Stage 4: Windows native tests (pwsh, py, js, ts - LF, CRLF, Mixed EOL)
+  [ OK ] Stage 2: README.md synchronization (24/24 languages)
+  [ OK ] Stage 3: macOS Darwin tests (24/24 languages)
+  [ OK ] Stage 4: Windows native tests (pwsh, py, js, ts, bat - LF, CRLF, Mixed EOL)
 ================================================================
 All tests passed across Linux, macOS, and Windows!
 EOF
@@ -45,12 +45,12 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
 ${DOCKER_OUT:-No output available}
 \`\`\`
 
-### 2. 📖 Sync with README.md (All 23 Languages)
+### 2. 📖 Sync with README.md (All 24 Languages)
 \`\`\`text
 ${README_OUT:-No output available}
 \`\`\`
 
-### 3. 🍏 macOS Tests (Darwin Host - All 23 Languages)
+### 3. 🍏 macOS Tests (Darwin Host - All 24 Languages)
 \`\`\`text
 ${MACOS_OUT:-No output available}
 \`\`\`
@@ -66,9 +66,9 @@ ${WINDOWS_OUT:-No output available}
                      TOTAL TEST SUMMARY                         
 ================================================================
   [ OK ] Stage 1: Docker tests (Linux container)
-  [ OK ] Stage 2: README.md synchronization (23/23 languages)
-  [ OK ] Stage 3: macOS Darwin tests (23/23 languages)
-  [ OK ] Stage 4: Windows native tests (pwsh, py, js, ts - LF, CRLF, Mixed EOL)
+  [ OK ] Stage 2: README.md synchronization (24/24 languages)
+  [ OK ] Stage 3: macOS Darwin tests (24/24 languages)
+  [ OK ] Stage 4: Windows native tests (pwsh, py, js, ts, bat - LF, CRLF, Mixed EOL)
 ================================================================
 All tests passed across Linux, macOS, and Windows!
 \`\`\`

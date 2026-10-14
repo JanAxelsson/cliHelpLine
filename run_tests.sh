@@ -11,7 +11,7 @@
 #
 #   ./run_tests.sh               # Run all 3 test stages:
 #                                #   1. Local host verification (Darwin/Linux)
-#                                #   2. Docker full-suite verification (all 14 languages)
+#                                #   2. Docker full-suite verification (all 22 Linux runtimes)
 #                                #   3. README.md 2-line snippet verification
 #   ./run_tests.sh <target...>   # Run test stages for specific script or language
 #                                # Examples:
@@ -28,7 +28,7 @@
 #
 # Requirements & Docker:
 #
-#   - Full test suite runs in Docker (all 14 runtimes pre-configured).
+#   - Full test suite runs in Docker (all 22 Linux runtimes pre-configured).
 #   - Running with '--local' or '-l' executes directly on the host machine without Docker.
 #   - If Docker is not currently running, this script will attempt to start it
 #     automatically (macOS, Linux, WSL, Windows).

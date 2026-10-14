@@ -34,10 +34,12 @@ function Test-ScriptHelpAndRun {
                 $script:testsPassed++
             } else {
                 Write-Host "[FAIL] $displayName ($flag)"
+                Write-Host "::error::$displayName ($flag) failed. Output: $($output.Trim())"
                 $script:testsFailed++
             }
         } catch {
             Write-Host "[FAIL] $displayName (${flag}: $($_.Exception.Message))"
+            Write-Host "::error::$displayName (${flag}: $($_.Exception.Message))"
             $script:testsFailed++
         }
     }
@@ -50,10 +52,12 @@ function Test-ScriptHelpAndRun {
             $script:testsPassed++
         } else {
             Write-Host "[FAIL] $displayName (running without --help: expected 'Hello world!', got '$($runOut.Trim())')"
+            Write-Host "::error::$displayName (running without --help: expected 'Hello world!', got '$($runOut.Trim())')"
             $script:testsFailed++
         }
     } catch {
         Write-Host "[FAIL] $displayName (running without --help: $($_.Exception.Message))"
+        Write-Host "::error::$displayName (running without --help: $($_.Exception.Message))"
         $script:testsFailed++
     }
 }
@@ -103,7 +107,7 @@ $encNoBom = New-Object System.Text.UTF8Encoding($false)
 
 try {
     # Generate CRLF and Mixed line ending variants
-    $targets = @("cliHelpLine.ps1", "cliHelpLine.py", "cliHelpLine.js", "cliHelpLine.ts")
+    $targets = @("cliHelpLine.ps1", "cliHelpLine.py", "cliHelpLine.js", "cliHelpLine.ts", "cliHelpLine.bat")
     foreach ($name in $targets) {
         $src = Join-Path $examplesDir $name
         if (-not (Test-Path $src)) { continue }
@@ -119,7 +123,7 @@ try {
         $lines = [System.IO.File]::ReadAllLines($src)
         $sb = New-Object System.Text.StringBuilder
         foreach ($line in $lines) {
-            if ($line -match "Help -- prints" -or $line -match '^\s*(if|import)\s*.*(sys\.argv|process\.argv|\$args)') {
+            if ($line -match "Help -- prints" -or $line -match '^\s*(if|import|for)\s*.*(sys\.argv|process\.argv|\$args|--help)') {
                 [void]$sb.Append($line + "`n")
             } else {
                 [void]$sb.Append($line + "`r`n")
@@ -172,6 +176,15 @@ try {
             Test-ScriptHelpAndRun "cliHelpLine.ts" {
                 param($f)
                 if ($f) { & $tsCmd $tsFile $f } else { & $tsCmd $tsFile }
+            } $tag
+        }
+
+        # 5. Batch (.bat)
+        $batFile = Join-Path $dir "cliHelpLine.bat"
+        if (Test-Path $batFile) {
+            Test-ScriptHelpAndRun "cliHelpLine.bat" {
+                param($f)
+                if ($f) { & cmd.exe /c "`"$batFile $f`"" } else { & cmd.exe /c "`"$batFile`"" }
             } $tag
         }
     }

@@ -47,7 +47,7 @@ Usage: ./backup.sh <source> <target>
 - **Single Source of Truth:** Your documentation lives inside the code comments at the very top of your file.
 - **Cross-Platform:** Works out-of-the-box with Unix `--help` and `-h`, as well as Windows `/?`.
 - **Compatible with Further Argument Parsing:** Only intercepts help requests; silently falls through for normal runs so you can still parse other arguments as usual.
-- **Multi-Language:** Works seamlessly across 23 scripting languages.
+- **Multi-Language:** Works seamlessly across 24 scripting languages.
 
 ## Code to use
 
@@ -55,7 +55,7 @@ Copy and paste the two lines corresponding to your programming language right af
 
 <a id="languages"></a>
 > **Jump to:**  
-> [AWK](#awk) · [Bash](#bash) · [Crystal](#crystal) · [Dart](#dart) · [Elixir](#elixir) · [Fish](#fish) · [Groovy](#groovy) · [JavaScript](#javascript) · [Julia](#julia) · [Lua](#lua) · [Nim](#nim) · [Perl](#perl) · [PHP](#php) · [PowerShell](#powershell) · [Python](#python) · [R](#r) · [Raku](#raku) · [Ruby](#ruby) · [Sh](#sh) · [Swift](#swift) · [Tcl](#tcl) · [TypeScript](#typescript) · [Zsh](#zsh)
+> [AWK](#awk) · [Bash](#bash) · [Batch (.bat)](#batch) · [Crystal](#crystal) · [Dart](#dart) · [Elixir](#elixir) · [Fish](#fish) · [Groovy](#groovy) · [JavaScript](#javascript) · [Julia](#julia) · [Lua](#lua) · [Nim](#nim) · [Perl](#perl) · [PHP](#php) · [PowerShell](#powershell) · [Python](#python) · [R](#r) · [Raku](#raku) · [Ruby](#ruby) · [Sh](#sh) · [Swift](#swift) · [Tcl](#tcl) · [TypeScript](#typescript) · [Zsh](#zsh)
 
 <a id="awk"></a>
 ### AWK
@@ -74,6 +74,16 @@ BEGIN { for (i in ARGV) if (ARGV[i] ~ /^(--help|-h|\/\?)$/) { for (a in PROCINFO
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "/?" ]; then sed -e '1{/^#!/d;}' -e '/^##/q' -e '/^[[:space:]]*$/d' -e 's/^#//g' -e 's/^ //g' "$0" | sed '$d'; exit 0; fi
 ```
 <small>[`cliHelpLine.bash`](examples/cliHelpLine.bash) · [↑](#languages "Back to languages")</small>
+
+<a id="batch"></a>
+### Batch (.bat)
+```bat
+REM REM Help -- prints header above (stops at 'REM REM')  (see https://github.com/JanAxelsson/cliHelpLine)
+(for %%H in (--help -h) do if /i "%~1"=="%%~H" set "_h=1") & (if "%~1"=="/?" set "_h=1") & if defined _h (powershell -NoProfile -Command "Get-Content '%~f0' | ForEach-Object { if ($_ -match '^REM REM') { exit 0 }; if ($_ -match '^REM') { $_ -replace '^REM ?','' } }" & exit /b 0)
+```
+> <small>**Important:** Windows Batch files should start with `@echo off` on line 1 so header comments are not echoed to the terminal during normal execution. If you prefer command echoing during the main script body, simply add `@echo on` right after the snippet.</small>
+
+<small>[`cliHelpLine.bat`](examples/cliHelpLine.bat) · [↑](#languages "Back to languages")</small>
 
 <a id="crystal"></a>
 ### Crystal

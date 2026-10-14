@@ -142,6 +142,12 @@ run_script_cmd() {
             nim r --hints:off "$target" "$@" < /dev/null 2>/dev/null ;;
         raku)
             raku "$target" "$@" < /dev/null 2>/dev/null ;;
+        bat|cmd)
+            if command -v cmd.exe >/dev/null 2>&1; then
+                cmd.exe /c "$target" "$@" < /dev/null 2>/dev/null
+            elif command -v cmd >/dev/null 2>&1; then
+                cmd /c "$target" "$@" < /dev/null 2>/dev/null
+            fi ;;
         *)
             "$target" "$@" < /dev/null 2>/dev/null ;;
     esac
@@ -180,6 +186,7 @@ is_interpreter_available() {
         groovy) command -v groovy >/dev/null 2>&1 ;;
         nim)  command -v nim >/dev/null 2>&1 ;;
         raku) command -v raku >/dev/null 2>&1 ;;
+        bat|cmd) command -v cmd.exe >/dev/null 2>&1 || command -v cmd >/dev/null 2>&1 ;;
         *)    return 0 ;;
     esac
 }
@@ -193,6 +200,8 @@ get_command_display() {
         awk)
             if command -v gawk >/dev/null 2>&1; then echo "gawk -E"; else echo "gawk"; fi ;;
         bash) echo "bash" ;;
+        bat|cmd)
+            if command -v cmd.exe >/dev/null 2>&1; then echo "cmd.exe"; else echo "cmd"; fi ;;
         sh)   echo "sh" ;;
         zsh)  echo "zsh" ;;
         fish) echo "fish" ;;
@@ -229,6 +238,7 @@ lang_for_file() {
     local ext="${1##*.}"
     case "$ext" in
         bash)       echo "bash" ;;
+        bat|cmd)    echo "bat" ;;
         sh)         echo "sh" ;;
         zsh)        echo "zsh" ;;
         fish)       echo "fish" ;;
@@ -265,6 +275,7 @@ get_comment_char() {
         [ -z "$trimmed" ] && continue
         [[ "$trimmed" == '#!'* ]] && continue
         [[ "$trimmed" == '<?php'* ]] && continue
+        [[ "$trimmed" == '@echo off'* ]] && continue
         echo "${trimmed%% *}"
         return 0
     done < "$file"
@@ -291,6 +302,11 @@ extract_expected_help() {
             continue
         fi
 
+        # Skip opening @echo off if present at top
+        if [ "$lineno" -le 2 ] && [[ "$line" == '@echo off'* ]]; then
+            continue
+        fi
+
         # Identify comment character and double-comment marker from first comment line
         if [ -z "$comment_char" ]; then
             local trimmed="${line#"${line%%[![:space:]]*}"}"
@@ -299,7 +315,11 @@ extract_expected_help() {
                 echo "Error: Could not identify comment character in $file" >&2
                 return 1
             fi
-            double_comment="${comment_char}${comment_char}"
+            if [ "$comment_char" = "REM" ]; then
+                double_comment="REM REM"
+            else
+                double_comment="${comment_char}${comment_char}"
+            fi
         fi
 
         # Stop at first line starting with double comment marker
@@ -331,6 +351,7 @@ extract_script_snippet() {
     local double_comment="$2"
     awk -v dcc="$double_comment" '
         BEGIN { found = 0 }
+        { sub(/\r$/, "") }
         $0 ~ "^" dcc { found = 1; print; next }
         found == 1 { print; exit }
     ' "$file"
@@ -342,6 +363,7 @@ extract_readme_snippet() {
     local readme="$2"
     awk -v lang="$lang" '
         BEGIN { in_code_section = 0; in_block = 0; count = 0 }
+        { sub(/\r$/, "") }
         /^## Code to use/ { in_code_section = 1 }
         in_code_section && tolower($0) ~ "^```" tolower(lang) "$" { in_block = 1; next }
         in_block && /^```/ { exit }
@@ -621,7 +643,11 @@ if [ "$RUN_README" -eq 1 ]; then
             target_name="$(basename "$target")"
             lang=$(lang_for_file "$target")
             cc=$(get_comment_char "$target")
-            dcc="${cc}${cc}"
+            if [ "$cc" = "REM" ]; then
+                dcc="REM REM"
+            else
+                dcc="${cc}${cc}"
+            fi
 
             extract_script_snippet "$target" "$dcc" > "$script_snip_tmp"
             extract_readme_snippet "$lang" "$README_FILE" > "$readme_snip_tmp"

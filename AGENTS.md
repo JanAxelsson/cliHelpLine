@@ -19,14 +19,15 @@ This document provides essential context, architectural decisions, design rules,
 
 ---
 
-## 2. Supported Languages (23 Total)
+## 2. Supported Languages (24 Total)
 
-All 23 language examples live in the `examples/` directory and are organized alphabetically (A–Z):
+All 24 language examples live in the `examples/` directory and are organized alphabetically (A–Z):
 
 | Language | Script File | Comment Char | Boundary Marker (Double-Comment) | Runtime / Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | **AWK** | `examples/cliHelpLine.awk` | `#` | `##` | `gawk` (GNU Awk required via shebang `-E`) |
 | **Bash** | `examples/cliHelpLine.bash` | `#` | `##` | `bash` |
+| **Batch (.bat)** | `examples/cliHelpLine.bat` | `REM` | `REM REM` | `cmd.exe` (`%~1`, `%~f0`, `findstr`, `@echo off`) |
 | **Crystal** | `examples/cliHelpLine.cr` | `#` | `##` | `crystal` (`ARGV`, `__FILE__`) |
 | **Dart** | `examples/cliHelpLine.dart` | `//` | `////` | `dart` (`Platform.script`, `args`) |
 | **Elixir** | `examples/cliHelpLine.exs` | `#` | `##` | `elixir` (`System.argv`, `__ENV__.file`) |
@@ -62,6 +63,7 @@ Where `<dcc>` is the language's double comment:
 * `#` languages $\rightarrow$ `##`
 * `//` languages $\rightarrow$ `////`
 * `--` languages $\rightarrow$ `----`
+* `REM` (Batch) $\rightarrow$ `REM REM`
 
 ### B. POSIX `sed` Compatibility
 In shell scripts (`bash`, `sh`, `zsh`, `fish`, `run_tests.sh`), **NEVER** use GNU-only `\s`. Always use POSIX character classes:
@@ -85,10 +87,10 @@ When invoking command-line runners in test scripts (especially `npx tsx`), alway
 
 ### F. README Structure & Navigation Rules
 1. **Alphabetical Ordering:**
-   All 23 language sections in `README.md` under `## Code to use` must be sorted strictly alphabetically from A to Z (with `Sh (POSIX Shell)` positioned under **S** between `Ruby` and `Swift`).
+   All 24 language sections in `README.md` under `## Code to use` must be sorted strictly alphabetically from A to Z (with `Batch` positioned between `Bash` and `Crystal`, and `Sh (POSIX Shell)` positioned under **S** between `Ruby` and `Swift`).
 2. **Quick-Jump Index Bar:**
    Located at `<a id="languages"></a>` directly beneath `## Code to use`. Contains clean links to each language anchor:
-   `> [AWK](#awk) · [Bash](#bash) · ... · [Zsh](#zsh)`
+   `> [AWK](#awk) · [Bash](#bash) · [Batch](#batch) · ... · [Zsh](#zsh)`
 3. **Explicit HTML Anchors:**
    Place `<a id="<lang>"></a>` directly above each `### <LanguageName>` heading. This guarantees navigation works consistently regardless of Markdown engine slugification.
 4. **Clean Headings:**
@@ -125,12 +127,19 @@ When invoking command-line runners in test scripts (especially `npx tsx`), alway
    - **Ruby (`cliHelpLine.rb`):** Uses `.chomp` (removes `\r\n`, `\n`, or `\r`).
    - **Perl (`cliHelpLine.pl`):** Uses `s/\r?\n$//` or `chomp`.
 4. **Why Unix (Linux & macOS) Must NOT Test CRLF:**
-   - On Linux and macOS, the kernel's `execve()` system call inspects shebang lines directly. If a file has CRLF endings, `\r` is treated as part of the interpreter binary name (`/usr/bin/env: 'python3\r': No such file or directory`), causing immediate OS kernel failure for all 23 languages.
+   - On Linux and macOS, the kernel's `execve()` system call inspects shebang lines directly. If a file has CRLF endings, `\r` is treated as part of the interpreter binary name (`/usr/bin/env: 'python3\r': No such file or directory`), causing immediate OS kernel failure for all languages.
    - POSIX shells (`bash`, `sh`, `zsh`) treat `\r` as illegal syntax tokens (`syntax error near unexpected token $'\r'`).
    - Therefore, CRLF is an unsupported defect state on Unix.
 5. **Windows Native CI Testing (`tests/test_windows.ps1`):**
-   - [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) verifies PowerShell, Python, Node.js, and TypeScript across all 3 EOL modes (`[LF]`, `[CRLF]`, and `[Mixed]`), testing `--help`, `-h`, the native Windows `/?` flag, and normal execution without arguments (48 tests total).
+   - [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) verifies PowerShell, Python, Node.js, TypeScript, and Batch across all 3 EOL modes (`[LF]`, `[CRLF]`, and `[Mixed]`), testing `--help`, `-h`, the native Windows `/?` flag, and normal execution without arguments (60 tests total).
    - **No-BOM UTF-8 Requirement:** When generating test fixtures programmatically in PowerShell/.NET, always instantiate `New-Object System.Text.UTF8Encoding($false)`. Using default `[System.Text.Encoding]::UTF8` emits a UTF-8 Byte Order Mark (BOM: `\xEF\xBB\xBF`), which prepends invisible bytes before `#!` and causes Node.js syntax errors.
+
+### I. Windows Batch (`cmd.exe`) Specifics
+- **`REM` vs `::`:** Batch scripts must use `REM` (and double-comment marker `REM REM`). While `::` is frequently used as a comment hack in Batch, it is internally parsed as an unreachable label and crashes with a fatal syntax error inside parenthesized blocks (`if (...)`, `for (...)`).
+- **`@echo off` Requirement on Line 1:** By default, `cmd.exe` has command echoing enabled (`echo on`), which causes `cmd.exe` to echo every comment line (`REM ...`) to stdout before executing it. Batch scripts must include `@echo off` on line 1 so that normal runs without help flags execute silently without leaking header comments. Developers who desire command echoing during the main script execution can simply place `@echo on` immediately after the 2-line snippet.
+- **Pure Windows Zero-Dependency Execution:** In CMD, `for %%H in (--help -h /?)` fails because `?` is treated as a wildcard search against files on disk. The snippet checks flags via `(for %%H in (--help -h) do if /i "%~1"=="%%~H" set "_h=1") & (if "%~1"=="/?" set "_h=1") & if defined _h ...`, reliably matching all three flags without filesystem side-effects.
+- **Built-in PowerShell File Reader:** CLI documentation frequently uses characters like `<file>`, `command | sort`, and `&`, which break standard CMD `echo` unless complex delayed expansion subshells are used. Instead, the snippet invokes Windows' built-in `powershell -NoProfile -Command "Get-Content '%~f0' | ForEach-Object { if ($_ -match '^REM REM') { exit 0 }; if ($_ -match '^REM') { $_ -replace '^REM ?','' } }"`. Because `powershell.exe` is built into every version of Windows since 2009, this provides zero external dependencies while natively handling all line endings (pure LF, CRLF, mixed), special characters, and UTF-8 encodings. Parenthesizing with `& exit /b 0` guarantees the main script body only executes when no help flags were passed.
+- **`.gitattributes` CRLF Rule:** Windows `cmd.exe` natively expects CRLF line endings for `.bat` files. `.gitattributes` explicitly sets `*.bat text eol=crlf` and `*.cmd text eol=crlf`.
 
 ---
 
@@ -152,18 +161,18 @@ Stage 1: Local Host   Stage 2: Docker     Stage 3: README
 ### What Each Script Test Checks:
 Every language script is verified under **both** invocation methods:
 1. **Direct Shebang Execution (`./cliHelpLine.<ext>`):**
-   - Invokes script directly via its shebang line (`#!`). All 23 languages support direct shebang execution (including PHP via `#!/usr/bin/env php` followed by `<?php`).
+   - Invokes script directly via its shebang line (`#!`). All 23 shebang-capable languages support direct shebang execution (including PHP via `#!/usr/bin/env php` followed by `<?php`). Windows Batch (`cliHelpLine.bat`) uses native command execution without shebang.
    - Verifies `--help` matches header comments and stops at boundary.
    - Verifies execution without arguments prints `"Hello world!"`.
 2. **Language Command Execution (`<cmd> cliHelpLine.<ext>`):**
-   - Invokes script with its language command as starter (`bash cliHelpLine.bash`, `python3 cliHelpLine.py`, `php cliHelpLine.php`, `gawk -E cliHelpLine.awk`, etc.).
+   - Invokes script with its language command as starter (`bash cliHelpLine.bash`, `python3 cliHelpLine.py`, `php cliHelpLine.php`, `gawk -E cliHelpLine.awk`, `cmd.exe /c cliHelpLine.bat`, etc.).
    - Verifies `--help` matches header comments and stops at boundary.
    - Verifies execution without arguments prints `"Hello world!"`.
 
 ### Summary Stages:
 - **Test 1/3: Local host tests:** Verifies direct execution via shebang, execution via language command starter, and running without `--help` on macOS/Linux. Missing host runtimes are quietly collected and reported underneath (`Skipped: <ext> (<runtime> not found)`) so that test logs remain clean with only `[ OK ]` or `[FAIL]`.
 - **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where 22 Linux runtimes (including Julia 1.10.12, tsx/bun/node, Crystal, Dart, Elixir, Groovy, Nim, and Raku) are installed. Both shebang and language command execution are verified across all Linux runtimes. Swift is skipped on Linux and verified on macOS.
-- **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 23 languages byte-for-byte.
+- **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 24 languages byte-for-byte.
 
 ### Continuous Integration (GitHub Actions - 3 Platforms):
 Automated CI runs on every push and pull request across all branches via `.github/workflows/tests.yml`.
@@ -191,7 +200,7 @@ Automated CI runs on every push and pull request across all branches via `.githu
 1. **`test-docker-and-readme` (Linux `ubuntu-latest`):**
    - **Docker Buildx Weekly Rolling Cache:** Uses GitHub Actions cache (`type=gha`) scoped by year and week (`scope=docker-YYYY-WW`). During the week, builds load from cache in seconds; at the start of each week, the scope automatically rolls over to rebuild against the latest Debian base image and security updates.
    - **Stage 1 (Docker Full Suite):** Runs `tests/test_cliHelpLine.sh --help-only` inside the Docker container, testing all 22 Linux runtimes for direct shebang execution, language command execution, and normal execution (`"Hello world!"`). Container includes `lua` symlink (`/usr/local/bin/lua -> /usr/bin/lua5.4`), npm packages `tsx` and `bun`, Google Dart SDK, Crystal with system `libgc.a`, and Raku (Rakudo).
-   - **Stage 2 (README Sync):** Runs `tests/test_cliHelpLine.sh --readme-only` on the host, verifying all 23 language snippets against `README.md` byte-for-byte.
+   - **Stage 2 (README Sync):** Runs `tests/test_cliHelpLine.sh --readme-only` on the host, verifying all 24 language snippets against `README.md` byte-for-byte.
    - **Output Passing:** Emits stripped text results directly to job outputs (`$GITHUB_OUTPUT`) in memory without creating fragile blob zip artifacts.
 
 2. **`test-macos` (macOS `macos-latest`):**
@@ -203,7 +212,7 @@ Automated CI runs on every push and pull request across all branches via `.githu
 
 3. **`test-windows` (Windows `windows-latest`):**
    - **Native Windows Server Runner:** Executes natively in PowerShell 7 (`pwsh`).
-   - **Stage 4 (Windows Native Tests):** Runs [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) to verify PowerShell (`pwsh`), Python, Node.js, and TypeScript across LF, CRLF, and Mixed line endings.
+   - **Stage 4 (Windows Native Tests):** Runs [`tests/test_windows.ps1`](file:///Users/jan/Documents/Projects/cliHelpLine/tests/test_windows.ps1) to verify PowerShell (`pwsh`), Python, Node.js, TypeScript, and Batch across LF, CRLF, and Mixed line endings.
    - **Windows-Specific Validation:** Explicitly tests the native Windows **`/?`** flag in addition to `-h` and `--help`, plus normal execution across all 3 line ending modes (pure LF from git, pure Windows CRLF, and mixed CRLF/LF simulating pasting from a browser). Does **not** re-run README sync (avoids test duplication).
    - **Output Passing:** Emits results to `$env:GITHUB_OUTPUT`.
 
@@ -213,7 +222,7 @@ Automated CI runs on every push and pull request across all branches via `.githu
    - **Zero Console Clutter:** Suppresses bash execution tracing so that opening the job log displays only pristine, formatted output.
    - **Front-Page Step Summary:** Writes Markdown directly to `$GITHUB_STEP_SUMMARY`, rendering all 4 stages in exact requested order on the GitHub Actions run homepage:
      1. 🐧 Docker Tests (All Linux Languages)
-     2. 📖 Sync with README.md (All 23 Languages)
+     2. 📖 Sync with README.md (All 24 Languages)
      3. 🍏 macOS Tests (Darwin Host)
      4. 🪟 Windows Tests (Native Host)
      5. 🏆 Total Test Summary

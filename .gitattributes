@@ -15,3 +15,5 @@
 *.ps1 text eol=lf
 *.tcl text eol=lf
 *.md text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
