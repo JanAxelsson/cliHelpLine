@@ -19,18 +19,23 @@ This document provides essential context, architectural decisions, design rules,
 
 ---
 
-## 2. Supported Languages (17 Total)
+## 2. Supported Languages (22 Total)
 
-All 17 language examples live in the `examples/` directory and are organized alphabetically (A–Z):
+All 22 language examples live in the `examples/` directory and are organized alphabetically (A–Z):
 
 | Language | Script File | Comment Char | Boundary Marker (Double-Comment) | Runtime / Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | **AWK** | `examples/cliHelpLine.awk` | `#` | `##` | `gawk` (GNU Awk required via shebang `-E`) |
 | **Bash** | `examples/cliHelpLine.bash` | `#` | `##` | `bash` |
+| **Crystal** | `examples/cliHelpLine.cr` | `#` | `##` | `crystal` (`ARGV`, `__FILE__`) |
+| **Dart** | `examples/cliHelpLine.dart` | `//` | `////` | `dart` (`Platform.script`, `args`) |
+| **Elixir** | `examples/cliHelpLine.exs` | `#` | `##` | `elixir` (`System.argv`, `__ENV__.file`) |
 | **Fish** | `examples/cliHelpLine.fish` | `#` | `##` | `fish` |
+| **Groovy** | `examples/cliHelpLine.groovy` | `//` | `////` | `groovy` (`args`, `getClass().protectionDomain`) |
 | **JavaScript** | `examples/cliHelpLine.js` | `//` | `////` | `node` (`process.argv`, `__filename`) |
 | **Julia** | `examples/cliHelpLine.jl` | `#` | `##` | `julia` (`ARGS`, `@__FILE__`) |
 | **Lua** | `examples/cliHelpLine.lua` | `--` | `----` | `lua` (`arg`, `arg[0]`) |
+| **Nim** | `examples/cliHelpLine.nim` | `#` | `##` | `nim` (`commandLineParams`, `currentSourcePath`) |
 | **Perl** | `examples/cliHelpLine.pl` | `#` | `##` | `perl` (`@ARGV`, `$0`) |
 | **PHP** | `examples/cliHelpLine.php` | `//` | `////` | `php` (`$argv`, `__FILE__`) · also `cliHelpLine_web.php` for web |
 | **PowerShell** | `examples/cliHelpLine.ps1` | `#` | `##` | `pwsh` (`$args`, `$MyInvocation`) |
@@ -79,7 +84,7 @@ When invoking command-line runners in test scripts (especially `npx tsx`), alway
 
 ### F. README Structure & Navigation Rules
 1. **Alphabetical Ordering:**
-   All 17 language sections in `README.md` under `## Code to use` must be sorted strictly alphabetically from A to Z (with `Sh (POSIX Shell)` positioned under **S** between `Ruby` and `Swift`).
+   All 22 language sections in `README.md` under `## Code to use` must be sorted strictly alphabetically from A to Z (with `Sh (POSIX Shell)` positioned under **S** between `Ruby` and `Swift`).
 2. **Quick-Jump Index Bar:**
    Located at `<a id="languages"></a>` directly beneath `## Code to use`. Contains clean links to each language anchor:
    `> [AWK](#awk) · [Bash](#bash) · ... · [Zsh](#zsh)`
@@ -96,7 +101,7 @@ When invoking command-line runners in test scripts (especially `npx tsx`), alway
    Test 3 extracts the 2-line code blocks from `README.md` and verifies that they match the respective files in `examples/` byte-for-byte.
 
 ### G. Shebang Execution & Runtime Resolution
-- **Direct Shebang Inspection:** When testing direct execution (`./cliHelpLine.<ext>`), `tests/test_cliHelpLine.sh` inspects the script's line 1 shebang using `get_shebang_cmd` to determine the exact required binary (e.g. `gawk` for AWK, `bun` for TypeScript, `pwsh` for PowerShell). If the binary is not present on the host or container, the test is cleanly reported under `Skipped:` rather than triggering a false failure.
+- **Direct Shebang Inspection:** When testing direct execution (`./cliHelpLine.<ext>`), `tests/test_cliHelpLine.sh` inspects the script's line 1 shebang using `get_shebang_cmd` to determine the exact required binary (e.g. `gawk` for AWK, `bun` for TypeScript, `pwsh` for PowerShell, `crystal` for Crystal, `dart` for Dart, `elixir` for Elixir, `groovy` for Groovy, `nim` for Nim). If the binary is not present on the host or container, the test is cleanly reported under `Skipped:` rather than triggering a false failure.
 - **TypeScript & Bun:** `examples/cliHelpLine.ts` uses `#!/usr/bin/env bun`. Both Docker (`tests/Dockerfile`) and macOS CI (`.github/workflows/tests.yml`) install `bun` via `npm install -g tsx bun` so that both direct shebang execution and language command execution run cleanly.
 - **Lua Compatibility in Debian:** Debian packages Lua as `lua5.4` (`/usr/bin/lua5.4`). `tests/Dockerfile` creates a symlink `ln -sf /usr/bin/lua5.4 /usr/local/bin/lua` so that `#!/usr/bin/env lua` succeeds without failing.
 - **PHP CLI vs. Web Dual Examples:** PHP scripts in web environments (FastCGI, PHP-FPM, Apache) leak shebang lines into HTTP response headers/body. cliHelpLine provides `examples/cliHelpLine.php` (CLI with `#!/usr/bin/env php` and `<?php`) and `examples/cliHelpLine_web.php` (starts directly with `<?php` without shebang). The test suite automatically tests both under `php <file>` and cleanly skips `cliHelpLine_web.php` in direct shebang execution.
@@ -119,7 +124,7 @@ When invoking command-line runners in test scripts (especially `npx tsx`), alway
    - **Ruby (`cliHelpLine.rb`):** Uses `.chomp` (removes `\r\n`, `\n`, or `\r`).
    - **Perl (`cliHelpLine.pl`):** Uses `s/\r?\n$//` or `chomp`.
 4. **Why Unix (Linux & macOS) Must NOT Test CRLF:**
-   - On Linux and macOS, the kernel's `execve()` system call inspects shebang lines directly. If a file has CRLF endings, `\r` is treated as part of the interpreter binary name (`/usr/bin/env: 'python3\r': No such file or directory`), causing immediate OS kernel failure for all 17 languages.
+   - On Linux and macOS, the kernel's `execve()` system call inspects shebang lines directly. If a file has CRLF endings, `\r` is treated as part of the interpreter binary name (`/usr/bin/env: 'python3\r': No such file or directory`), causing immediate OS kernel failure for all 22 languages.
    - POSIX shells (`bash`, `sh`, `zsh`) treat `\r` as illegal syntax tokens (`syntax error near unexpected token $'\r'`).
    - Therefore, CRLF is an unsupported defect state on Unix.
 5. **Windows Native CI Testing (`tests/test_windows.ps1`):**
@@ -138,7 +143,7 @@ The test suite is orchestrated by [`run_tests.sh`](file:///Users/jan/Documents/P
        ┌───────────────────┼───────────────────┐
        ▼                   ▼                   ▼
 Stage 1: Local Host   Stage 2: Docker     Stage 3: README
-(Verifies installed   (Verifies all 16    (Synchronizes
+(Verifies installed   (Verifies all 21    (Synchronizes
  local runtimes)       Linux runtimes in   2-line snippets
                        slim container)     against README)
 ```
@@ -146,7 +151,7 @@ Stage 1: Local Host   Stage 2: Docker     Stage 3: README
 ### What Each Script Test Checks:
 Every language script is verified under **both** invocation methods:
 1. **Direct Shebang Execution (`./cliHelpLine.<ext>`):**
-   - Invokes script directly via its shebang line (`#!`). All 17 languages support direct shebang execution (including PHP via `#!/usr/bin/env php` followed by `<?php`).
+   - Invokes script directly via its shebang line (`#!`). All 22 languages support direct shebang execution (including PHP via `#!/usr/bin/env php` followed by `<?php`).
    - Verifies `--help` matches header comments and stops at boundary.
    - Verifies execution without arguments prints `"Hello world!"`.
 2. **Language Command Execution (`<cmd> cliHelpLine.<ext>`):**
@@ -156,8 +161,8 @@ Every language script is verified under **both** invocation methods:
 
 ### Summary Stages:
 - **Test 1/3: Local host tests:** Verifies direct execution via shebang, execution via language command starter, and running without `--help` on macOS/Linux. Missing host runtimes are quietly collected and reported underneath (`Skipped: <ext> (<runtime> not found)`) so that test logs remain clean with only `[ OK ]` or `[FAIL]`.
-- **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where 16 Linux runtimes (including Julia 1.10.12 and tsx/bun/node) are installed. Both shebang and language command execution are verified across all Linux runtimes. Swift is skipped on Linux and verified on macOS.
-- **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 17 languages byte-for-byte.
+- **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where 21 Linux runtimes (including Julia 1.10.12, tsx/bun/node, Crystal, Dart, Elixir, Groovy, and Nim) are installed. Both shebang and language command execution are verified across all Linux runtimes. Swift is skipped on Linux and verified on macOS.
+- **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 22 languages byte-for-byte.
 
 ### Continuous Integration (GitHub Actions - 3 Platforms):
 Automated CI runs on every push and pull request across all branches via `.github/workflows/tests.yml`.
@@ -184,13 +189,13 @@ Automated CI runs on every push and pull request across all branches via `.githu
 #### The 4 Jobs Explained:
 1. **`test-docker-and-readme` (Linux `ubuntu-latest`):**
    - **Docker Buildx Cache:** Uses GitHub Actions cache (`type=gha`) to cache the `clihelpline-tester` Docker image layers, speeding up builds to seconds.
-   - **Stage 1 (Docker Full Suite):** Runs `tests/test_cliHelpLine.sh --help-only` inside the Docker container, testing all 16 Linux runtimes for direct shebang execution, language command execution, and normal execution (`"Hello world!"`). Container includes `lua` symlink (`/usr/local/bin/lua -> /usr/bin/lua5.4`) and npm packages `tsx` and `bun`.
-   - **Stage 2 (README Sync):** Runs `tests/test_cliHelpLine.sh --readme-only` on the host, verifying all 17 language snippets against `README.md` byte-for-byte.
+   - **Stage 1 (Docker Full Suite):** Runs `tests/test_cliHelpLine.sh --help-only` inside the Docker container, testing all 21 Linux runtimes for direct shebang execution, language command execution, and normal execution (`"Hello world!"`). Container includes `lua` symlink (`/usr/local/bin/lua -> /usr/bin/lua5.4`), npm packages `tsx` and `bun`, Google Dart SDK, and Crystal with system `libgc.a`.
+   - **Stage 2 (README Sync):** Runs `tests/test_cliHelpLine.sh --readme-only` on the host, verifying all 22 language snippets against `README.md` byte-for-byte.
    - **Output Passing:** Emits stripped text results directly to job outputs (`$GITHUB_OUTPUT`) in memory without creating fragile blob zip artifacts.
 
 2. **`test-macos` (macOS `macos-latest`):**
    - **Native Darwin Runner:** Executes on Apple Silicon (M-series) macOS hardware.
-   - **Homebrew & npm Setup:** Installs `gawk`, `fish`, `lua`, `php`, `r`, and `julia` via Homebrew, and `tsx` and `bun` via npm (`pwsh`, `python3`, `node`, `ruby`, `perl`, `bash`, `zsh`, `swift` are native/pre-installed).
+   - **Homebrew & npm Setup:** Installs `gawk`, `fish`, `lua`, `php`, `r`, `julia`, `elixir`, `groovy`, `nim`, and `crystal` via Homebrew, and `tsx` and `bun` via npm (`pwsh`, `python3`, `node`, `ruby`, `perl`, `bash`, `zsh`, `swift` are native/pre-installed).
    - **Stage 3 (macOS Native Tests):** Runs `tests/test_cliHelpLine.sh --help-only` directly on Darwin, guaranteeing BSD `sed`, `gawk`, Swift, and macOS permission compatibility. Does **not** re-run README sync (avoids test duplication).
    - **Output Passing:** Emits results to `$GITHUB_OUTPUT`.
 
@@ -206,7 +211,7 @@ Automated CI runs on every push and pull request across all branches via `.githu
    - **Zero Console Clutter:** Suppresses bash execution tracing so that opening the job log displays only pristine, formatted output.
    - **Front-Page Step Summary:** Writes Markdown directly to `$GITHUB_STEP_SUMMARY`, rendering all 4 stages in exact requested order on the GitHub Actions run homepage:
      1. 🐧 Docker Tests (All Linux Languages)
-     2. 📖 Sync with README.md (All 17 Languages)
+     2. 📖 Sync with README.md (All 22 Languages)
      3. 🍏 macOS Tests (Darwin Host)
      4. 🪟 Windows Tests (Native Host)
      5. 🏆 Total Test Summary

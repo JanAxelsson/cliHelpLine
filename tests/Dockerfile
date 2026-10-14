@@ -1,5 +1,5 @@
 # Dockerfile for cliHelpLine multi-language test environment
-# Supports: Bash, POSIX Sh, Zsh, Fish, Python 3, Node.js, TypeScript, Ruby, Perl, PHP, Lua, R, PowerShell Core, Tcl, AWK, Julia
+# Supports: Bash, POSIX Sh, Zsh, Fish, Python 3, Node.js, TypeScript, Ruby, Perl, PHP, Lua, R, PowerShell Core, Tcl, AWK, Julia, Crystal, Dart, Elixir, Groovy, Nim
 FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -24,6 +24,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lua5.4 \
     r-base-core \
     tcl \
+    elixir \
+    groovy \
+    nim \
+    gcc \
+    pkg-config \
+    libevent-dev \
+    libpcre2-dev \
+    libgc-dev \
     && ln -sf /usr/bin/lua5.4 /usr/local/bin/lua \
     && rm -rf /var/lib/apt/lists/*
 
@@ -49,6 +57,25 @@ RUN ARCH=$(dpkg --print-architecture) && \
     apt-get update && \
     apt-get install -y --no-install-recommends powershell && \
     rm -rf /var/lib/apt/lists/*
+
+# Install Dart (multi-arch from Google apt repository)
+RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/dart.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/dart.gpg] https://storage.googleapis.com/download.dartlang.org/linux/debian stable main" \
+      > /etc/apt/sources.list.d/dart_stable.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends dart && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Crystal (multi-arch arm64 / amd64 official binaries with system libgc)
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "arm64" ]; then CR_ARCH="aarch64"; else CR_ARCH="x86_64"; fi && \
+    curl -fsSL "https://github.com/crystal-lang/crystal/releases/download/1.22.0/crystal-1.22.0-1-linux-${CR_ARCH}.tar.gz" -o /tmp/crystal.tar.gz && \
+    mkdir -p /opt/cr && \
+    tar -xzf /tmp/crystal.tar.gz -C /opt/cr && \
+    mv /opt/cr/crystal* /opt/crystal && \
+    rm -rf /opt/cr /tmp/crystal.tar.gz && \
+    ln -s /opt/crystal/bin/crystal /usr/local/bin/crystal && \
+    ln -sf /usr/lib/*-linux-gnu*/libgc.a /opt/crystal/lib/crystal/libgc.a
 
 # Set default working directory
 WORKDIR /workspace

@@ -132,6 +132,16 @@ run_script_cmd() {
             julia "$target" "$@" < /dev/null 2>/dev/null ;;
         swift)
             swift -module-cache-path "${TMPDIR:-/tmp}/swift-cache" "$target" "$@" < /dev/null 2>/dev/null ;;
+        cr)
+            crystal run "$target" -- "$@" < /dev/null 2>/dev/null ;;
+        dart)
+            dart run "$target" "$@" < /dev/null 2>/dev/null ;;
+        exs)
+            elixir "$target" "$@" < /dev/null 2>/dev/null ;;
+        groovy)
+            groovy "$target" "$@" < /dev/null 2>/dev/null ;;
+        nim)
+            nim r --hints:off "$target" "$@" < /dev/null 2>/dev/null ;;
         *)
             "$target" "$@" < /dev/null 2>/dev/null ;;
     esac
@@ -164,6 +174,11 @@ is_interpreter_available() {
         ts)   command -v bun >/dev/null 2>&1 || command -v tsx >/dev/null 2>&1 || command -v deno >/dev/null 2>&1 || command -v ts-node >/dev/null 2>&1 || (command -v node >/dev/null 2>&1 && node --experimental-strip-types -e 'process.exit(0)' >/dev/null 2>&1) ;;
         jl)   command -v julia >/dev/null 2>&1 ;;
         swift) command -v swift >/dev/null 2>&1 ;;
+        cr)   command -v crystal >/dev/null 2>&1 ;;
+        dart) command -v dart >/dev/null 2>&1 ;;
+        exs)  command -v elixir >/dev/null 2>&1 ;;
+        groovy) command -v groovy >/dev/null 2>&1 ;;
+        nim)  command -v nim >/dev/null 2>&1 ;;
         *)    return 0 ;;
     esac
 }
@@ -193,6 +208,11 @@ get_command_display() {
         tcl)  echo "tclsh" ;;
         jl)   echo "julia" ;;
         swift) echo "swift" ;;
+        cr)   echo "crystal run" ;;
+        dart) echo "dart run" ;;
+        exs)  echo "elixir" ;;
+        groovy) echo "groovy" ;;
+        nim)  echo "nim r" ;;
         ts)
             if command -v bun >/dev/null 2>&1; then echo "bun";
             elif command -v tsx >/dev/null 2>&1; then echo "tsx";
@@ -221,6 +241,11 @@ lang_for_file() {
         ps1)        echo "powershell" ;;
         tcl)        echo "tcl" ;;
         awk)        echo "awk" ;;
+        cr)         echo "crystal" ;;
+        dart)       echo "dart" ;;
+        exs)        echo "elixir" ;;
+        groovy)     echo "groovy" ;;
+        nim)        echo "nim" ;;
         ts)         echo "typescript" ;;
         jl)         echo "julia" ;;
         swift)      echo "swift" ;;
