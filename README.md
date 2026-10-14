@@ -1,7 +1,7 @@
 # cliHelpLine
 
 [![Tests](https://github.com/JanAxelsson/cliHelpLine/actions/workflows/tests.yml/badge.svg)](https://github.com/JanAxelsson/cliHelpLine/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/version-0.2-blue.svg)](https://github.com/JanAxelsson/cliHelpLine/releases)
+[![Version](https://img.shields.io/badge/version-0.3-blue.svg)](https://github.com/JanAxelsson/cliHelpLine/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **Turn your script's header comments into `--help`, `-h`, and `/?` output with a 2-line snippet.**  
