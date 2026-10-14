@@ -32,7 +32,7 @@ All 17 language examples live in the `examples/` directory and are organized alp
 | **Julia** | `examples/cliHelpLine.jl` | `#` | `##` | `julia` (`ARGS`, `@__FILE__`) |
 | **Lua** | `examples/cliHelpLine.lua` | `--` | `----` | `lua` (`arg`, `arg[0]`) |
 | **Perl** | `examples/cliHelpLine.pl` | `#` | `##` | `perl` (`@ARGV`, `$0`) |
-| **PHP** | `examples/cliHelpLine.php` | `//` | `////` | `php` (`$argv`, `__FILE__`) |
+| **PHP** | `examples/cliHelpLine.php` | `//` | `////` | `php` (`$argv`, `__FILE__`) · also `cliHelpLine_web.php` for web |
 | **PowerShell** | `examples/cliHelpLine.ps1` | `#` | `##` | `pwsh` (`$args`, `$MyInvocation`) |
 | **Python** | `examples/cliHelpLine.py` | `#` | `##` | `python3` (`sys.argv`, `__file__`) |
 | **R** | `examples/cliHelpLine.r` | `#` | `##` | `Rscript` (`commandArgs`) |
@@ -99,6 +99,7 @@ When invoking command-line runners in test scripts (especially `npx tsx`), alway
 - **Direct Shebang Inspection:** When testing direct execution (`./cliHelpLine.<ext>`), `tests/test_cliHelpLine.sh` inspects the script's line 1 shebang using `get_shebang_cmd` to determine the exact required binary (e.g. `gawk` for AWK, `bun` for TypeScript, `pwsh` for PowerShell). If the binary is not present on the host or container, the test is cleanly reported under `Skipped:` rather than triggering a false failure.
 - **TypeScript & Bun:** `examples/cliHelpLine.ts` uses `#!/usr/bin/env bun`. Both Docker (`tests/Dockerfile`) and macOS CI (`.github/workflows/tests.yml`) install `bun` via `npm install -g tsx bun` so that both direct shebang execution and language command execution run cleanly.
 - **Lua Compatibility in Debian:** Debian packages Lua as `lua5.4` (`/usr/bin/lua5.4`). `tests/Dockerfile` creates a symlink `ln -sf /usr/bin/lua5.4 /usr/local/bin/lua` so that `#!/usr/bin/env lua` succeeds without failing.
+- **PHP CLI vs. Web Dual Examples:** PHP scripts in web environments (FastCGI, PHP-FPM, Apache) leak shebang lines into HTTP response headers/body. cliHelpLine provides `examples/cliHelpLine.php` (CLI with `#!/usr/bin/env php` and `<?php`) and `examples/cliHelpLine_web.php` (starts directly with `<?php` without shebang). The test suite automatically tests both under `php <file>` and cleanly skips `cliHelpLine_web.php` in direct shebang execution.
 - **Accurate Counting:** Test counting uses independent `total_run`, `pass_count`, `fail_count`, and `skip_count` variables to ensure test summaries remain mathematically accurate across subsets and skipped tests.
 
 ---

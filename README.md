@@ -121,7 +121,9 @@ if (grep { $_ eq '--help' || $_ eq '-h' || $_ eq '/?' } @ARGV) { open my $f, '<'
 //// Help -- prints header above (stops at '////')  (see https://github.com/JanAxelsson/cliHelpLine)
 if (array_intersect($argv ?? [], ['--help', '-h', '/?'])) { foreach (file(__FILE__) as $i => $l) { if ($i <= 1 && (str_starts_with($l, '#!') || str_starts_with($l, '<?php'))) continue; if (str_starts_with($l, '////')) break; if (str_starts_with($l, '//') || trim($l) !== '') echo preg_replace('/^\/\/ ?/', '', $l); } exit(0); }
 ```
-<small>[`cliHelpLine.php`](examples/cliHelpLine.php) · [↑](#languages "Back to languages")</small>
+> <small>**Tip:** In CLI scripts, use `#!/usr/bin/env php` followed by `<?php` on line 2 for direct `./script.php` execution. In web/HTTP environments (FastCGI, PHP-FPM, Apache), start directly with `<?php` on line 1 without a shebang to avoid output/header leaks.</small>
+
+<small>[`cliHelpLine.php`](examples/cliHelpLine.php) (CLI) · [`cliHelpLine_web.php`](examples/cliHelpLine_web.php) (Web) · [↑](#languages "Back to languages")</small>
 
 <a id="powershell"></a>
 ### PowerShell

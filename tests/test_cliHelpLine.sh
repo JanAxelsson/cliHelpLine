@@ -406,15 +406,15 @@ if [ "${#filtered_args[@]}" -gt 0 ]; then
             matched=""
             for search_dir in "$EXAMPLES_DIR" "$PROJECT_ROOT"; do
                 [ -d "$search_dir" ] || continue
-                for f in "$search_dir"/cliHelpLine.*; do
+                for f in "$search_dir"/cliHelpLine.* "$search_dir"/cliHelpLine_*.*; do
                     [ -f "$f" ] || continue
                     lang=$(lang_for_file "$f")
                     if [ "$lang" = "$arg" ]; then
                         files+=("$f")
                         matched=1
-                        break 2
                     fi
                 done
+                [ -n "$matched" ] && break
             done
             if [ -z "$matched" ]; then
                 echo "Warning: No test file found for '$arg'" >&2
@@ -424,7 +424,7 @@ if [ "${#filtered_args[@]}" -gt 0 ]; then
 else
     search_dir="$EXAMPLES_DIR"
     [ -d "$search_dir" ] || search_dir="$PROJECT_ROOT"
-    for f in "$search_dir"/cliHelpLine.*; do
+    for f in "$search_dir"/cliHelpLine.* "$search_dir"/cliHelpLine_*.*; do
         [ -f "$f" ] || continue
         # Skip the test script itself or temporary files
         case "$(basename "$f")" in
