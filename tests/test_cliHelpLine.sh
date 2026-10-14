@@ -243,13 +243,19 @@ lang_for_file() {
     esac
 }
 
-# Extract comment character from line 2
+# Extract comment character from the first comment line
 get_comment_char() {
     local file="$1"
-    local line2
-    line2=$(sed -n "2p" "$file")
-    local trimmed="${line2#"${line2%%[![:space:]]*}"}"
-    echo "${trimmed%% *}"
+    local line
+    while IFS= read -r line || [ -n "$line" ]; do
+        line="${line%$'\r'}"
+        local trimmed="${line#"${line%%[![:space:]]*}"}"
+        [ -z "$trimmed" ] && continue
+        [[ "$trimmed" == '#!'* ]] && continue
+        [[ "$trimmed" == '<?php'* ]] && continue
+        echo "${trimmed%% *}"
+        return 0
+    done < "$file"
 }
 
 # Extract expected help text according to specification
@@ -263,17 +269,22 @@ extract_expected_help() {
         line="${line%$'\r'}"
         lineno=$((lineno + 1))
 
-        # Skip line 1 (shebang)
-        if [ "$lineno" -eq 1 ]; then
+        # Skip line 1 shebang
+        if [ "$lineno" -eq 1 ] && [[ "$line" == '#!'* ]]; then
             continue
         fi
 
-        # Line 2: Identify comment character and double-comment marker
-        if [ "$lineno" -eq 2 ]; then
+        # Skip opening <?php tag if present at top
+        if [ "$lineno" -le 2 ] && [[ "$line" == '<?php'* ]]; then
+            continue
+        fi
+
+        # Identify comment character and double-comment marker from first comment line
+        if [ -z "$comment_char" ]; then
             local trimmed="${line#"${line%%[![:space:]]*}"}"
             comment_char="${trimmed%% *}"
             if [ -z "$comment_char" ]; then
-                echo "Error: Could not identify comment character on line 2 in $file" >&2
+                echo "Error: Could not identify comment character in $file" >&2
                 return 1
             fi
             double_comment="${comment_char}${comment_char}"

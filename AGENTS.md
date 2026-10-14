@@ -121,7 +121,7 @@ Stage 1: Local Host   Stage 2: Docker     Stage 3: README
 ### What Each Script Test Checks:
 Every language script is verified under **both** invocation methods:
 1. **Direct Shebang Execution (`./cliHelpLine.<ext>`):**
-   - Invokes script directly via its shebang line (`#!`). (Scripts without shebangs like `cliHelpLine.php` are gracefully collected in `Skipped:`).
+   - Invokes script directly via its shebang line (`#!`). All 17 languages support direct shebang execution (including PHP via `#!/usr/bin/env php` followed by `<?php`).
    - Verifies `--help` matches header comments and stops at boundary.
    - Verifies execution without arguments prints `"Hello world!"`.
 2. **Language Command Execution (`<cmd> cliHelpLine.<ext>`):**
