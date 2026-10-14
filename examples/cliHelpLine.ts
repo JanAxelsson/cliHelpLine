@@ -28,7 +28,7 @@ if (process.argv.some((arg: string) => ['--help', '-h', '/?'].includes(arg))) { 
 // (line.startsWith('////') ? false :                                                // If row hits '////', return false to instantly break the loop and stop printing
 // ((line.startsWith('//') || line.trim() !== '') &&                                 // Delete and ignore empty lines without comment characters
 // console.log(                                                                      // Otherwise, pass the processed row into the console output stream:
-// line.startsWith('//') ? line.replace(/^\/\/ ?/, '')                               // Clean leading '//' and exactly ONE optional trailing space to preserve indentations
+// line.startsWith('//') ? line.replace(/^\/\/ ?/, '')                               // Clean leading '//' and exactly ONE optional following space to preserve indentations
 // : line                                                                            // If it is a standard code row, print it out exactly as it is written
 // ), true)));                                                                       // Return true to keep the loop rolling onto the very next line
 // process.exit(0); }                                                                // Gracefully close the process so your main script logic never triggers
