@@ -189,13 +189,14 @@ Automated CI runs on every push and pull request across all branches via `.githu
 
 #### The 4 Jobs Explained:
 1. **`test-docker-and-readme` (Linux `ubuntu-latest`):**
-   - **Docker Buildx Cache:** Uses GitHub Actions cache (`type=gha`) to cache the `clihelpline-tester` Docker image layers, speeding up builds to seconds.
+   - **Docker Buildx Weekly Rolling Cache:** Uses GitHub Actions cache (`type=gha`) scoped by year and week (`scope=docker-YYYY-WW`). During the week, builds load from cache in seconds; at the start of each week, the scope automatically rolls over to rebuild against the latest Debian base image and security updates.
    - **Stage 1 (Docker Full Suite):** Runs `tests/test_cliHelpLine.sh --help-only` inside the Docker container, testing all 22 Linux runtimes for direct shebang execution, language command execution, and normal execution (`"Hello world!"`). Container includes `lua` symlink (`/usr/local/bin/lua -> /usr/bin/lua5.4`), npm packages `tsx` and `bun`, Google Dart SDK, Crystal with system `libgc.a`, and Raku (Rakudo).
    - **Stage 2 (README Sync):** Runs `tests/test_cliHelpLine.sh --readme-only` on the host, verifying all 23 language snippets against `README.md` byte-for-byte.
    - **Output Passing:** Emits stripped text results directly to job outputs (`$GITHUB_OUTPUT`) in memory without creating fragile blob zip artifacts.
 
 2. **`test-macos` (macOS `macos-latest`):**
    - **Native Darwin Runner:** Executes on Apple Silicon (M-series) macOS hardware.
+   - **Weekly Rolling Homebrew Bottle Cache:** Uses `actions/cache@v4` on `~/Library/Caches/Homebrew` scoped by year and week (`macOS-brew-YYYY-WW-...`) with `HOMEBREW_NO_AUTO_UPDATE=1`. Skips redundant multi-gigabyte downloads (LLVM, Erlang, MoarVM) on everyday pushes, reducing job time from ~5 minutes to ~1.5 minutes, while automatically refreshing dependencies weekly.
    - **Homebrew & npm Setup:** Installs `gawk`, `fish`, `lua`, `php`, `r`, `julia`, `elixir`, `groovy`, `nim`, `crystal`, and `rakudo` via Homebrew, and `tsx` and `bun` via npm (`pwsh`, `python3`, `node`, `ruby`, `perl`, `bash`, `zsh`, `swift` are native/pre-installed).
    - **Stage 3 (macOS Native Tests):** Runs `tests/test_cliHelpLine.sh --help-only` directly on Darwin, guaranteeing BSD `sed`, `gawk`, Swift, and macOS permission compatibility. Does **not** re-run README sync (avoids test duplication).
    - **Output Passing:** Emits results to `$GITHUB_OUTPUT`.

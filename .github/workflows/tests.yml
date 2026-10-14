@@ -5,6 +5,8 @@ on:
     branches: [ "**" ]
   pull_request:
     branches: [ "**" ]
+  schedule:
+    - cron: '0 3 * * 1' # Weekly on Monday at 3:00 AM UTC (auto-refreshes rolling caches)
   workflow_dispatch:
 
 jobs:
@@ -25,6 +27,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Get current year and week
+        id: cache-key
+        run: echo "week=$(date +'%Y-%U')" >> "$GITHUB_OUTPUT"
+
       - name: Build Docker test image (cached)
         uses: docker/build-push-action@v6
         with:
@@ -32,8 +38,10 @@ jobs:
           file: tests/Dockerfile
           tags: clihelpline-tester:latest
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: |
+            type=gha,scope=docker-${{ steps.cache-key.outputs.week }}
+            type=gha,scope=docker-base
+          cache-to: type=gha,mode=max,scope=docker-${{ steps.cache-key.outputs.week }}
 
       - name: Run Docker test suite (All 22 Linux languages)
         id: step_docker
@@ -75,12 +83,28 @@ jobs:
   test-macos:
     name: macOS (Darwin Host)
     runs-on: macos-latest
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
     outputs:
       macos_out: ${{ steps.step_macos.outputs.macos_out }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Get current year and week
+        id: cache-key
+        run: echo "week=$(date +'%Y-%U')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Homebrew downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ runner.os }}-brew-${{ steps.cache-key.outputs.week }}-${{ hashFiles('.github/workflows/tests.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-brew-${{ steps.cache-key.outputs.week }}-
+            ${{ runner.os }}-brew-
 
       - name: Install macOS runtimes via Homebrew & npm
         run: |
