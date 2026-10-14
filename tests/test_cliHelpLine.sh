@@ -20,96 +20,97 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 README_FILE="$PROJECT_ROOT/README.md"
 
-# Function to execute a cliHelpLine script with optional arguments
-run_script() {
+# Function to execute a script directly via shebang
+run_script_direct() {
+    local target="$1"
+    shift
+    local env_path="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+    PATH="$env_path" RUBYOPT="--disable-gems" CLANG_MODULE_CACHE_PATH="${TMPDIR:-/tmp}/swift-cache" "$target" "$@" < /dev/null 2>/dev/null
+}
+
+# Function to execute a script using its language command first
+run_script_cmd() {
     local target="$1"
     shift
     local ext="${target##*.}"
+    local env_path="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
     local output
 
-    # 1. Try direct execution if executable
-    if [ -x "$target" ]; then
-        if output=$( RUBYOPT="--disable-gems" "$target" "$@" < /dev/null 2>/dev/null ); then
-            printf "%s\n" "$output"
-            return 0
-        fi
-    fi
-
-    # 2. Fall back to interpreter based on file extension
     case "$ext" in
         bash)
-            bash "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" bash "$target" "$@" < /dev/null 2>/dev/null ;;
         sh)
-            sh "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" sh "$target" "$@" < /dev/null 2>/dev/null ;;
         zsh)
-            zsh "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" zsh "$target" "$@" < /dev/null 2>/dev/null ;;
         fish)
-            fish "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" fish "$target" "$@" < /dev/null 2>/dev/null ;;
         py)
-            if command -v python3 >/dev/null 2>&1 && output=$(python3 "$target" "$@" 2>/dev/null); then
+            if command -v python3 >/dev/null 2>&1 && output=$(PATH="$env_path" python3 "$target" "$@" < /dev/null 2>/dev/null); then
                 printf "%s\n" "$output"
             elif [ -x /opt/homebrew/bin/python3 ]; then
-                /opt/homebrew/bin/python3 "$target" "$@" 2>/dev/null
+                PATH="$env_path" /opt/homebrew/bin/python3 "$target" "$@" < /dev/null 2>/dev/null
             elif [ -x /usr/bin/python3 ]; then
-                /usr/bin/python3 "$target" "$@" 2>/dev/null
+                PATH="$env_path" /usr/bin/python3 "$target" "$@" < /dev/null 2>/dev/null
             elif command -v python >/dev/null 2>&1; then
-                python "$target" "$@" 2>/dev/null
+                PATH="$env_path" python "$target" "$@" < /dev/null 2>/dev/null
             fi ;;
         js|mjs|cjs)
-            if command -v node >/dev/null 2>&1 && output=$(node "$target" "$@" 2>/dev/null); then
+            if command -v node >/dev/null 2>&1 && output=$(PATH="$env_path" node "$target" "$@" < /dev/null 2>/dev/null); then
                 printf "%s\n" "$output"
             elif [ -x /usr/local/bin/node ]; then
-                /usr/local/bin/node "$target" "$@" 2>/dev/null
+                PATH="$env_path" /usr/local/bin/node "$target" "$@" < /dev/null 2>/dev/null
             elif [ -x /opt/homebrew/bin/node ]; then
-                /opt/homebrew/bin/node "$target" "$@" 2>/dev/null
+                PATH="$env_path" /opt/homebrew/bin/node "$target" "$@" < /dev/null 2>/dev/null
             fi ;;
         rb)
-            RUBYOPT="--disable-gems" ruby --disable-gems "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" RUBYOPT="--disable-gems" ruby --disable-gems "$target" "$@" < /dev/null 2>/dev/null ;;
         pl)
-            perl "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" perl "$target" "$@" < /dev/null 2>/dev/null ;;
         php)
-            php "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" php "$target" "$@" < /dev/null 2>/dev/null ;;
         lua)
-            lua "$target" "$@" 2>/dev/null || lua5.4 "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" lua "$target" "$@" < /dev/null 2>/dev/null || PATH="$env_path" lua5.4 "$target" "$@" < /dev/null 2>/dev/null ;;
         r|R)
-            Rscript "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" Rscript "$target" "$@" < /dev/null 2>/dev/null ;;
         ps1)
-            pwsh -NoProfile -File "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" pwsh -NoProfile -File "$target" "$@" < /dev/null 2>/dev/null ;;
         tcl)
-            tclsh "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" tclsh "$target" "$@" < /dev/null 2>/dev/null ;;
         awk)
-            if [ "$#" -gt 0 ]; then
-                if command -v gawk >/dev/null 2>&1; then
-                    gawk -f "$target" -- "$@" 2>/dev/null
-                elif command -v awk >/dev/null 2>&1; then
-                    awk -f "$target" -- "$@" 2>/dev/null
-                fi
-            else
-                if command -v gawk >/dev/null 2>&1; then
-                    gawk -f "$target" 2>/dev/null
-                elif command -v awk >/dev/null 2>&1; then
-                    awk -f "$target" 2>/dev/null
+            if command -v gawk >/dev/null 2>&1; then
+                PATH="$env_path" gawk -E "$target" "$@" < /dev/null 2>/dev/null
+            elif command -v awk >/dev/null 2>&1; then
+                if [ "$#" -gt 0 ]; then
+                    PATH="$env_path" awk -f "$target" -- "$@" < /dev/null 2>/dev/null
+                else
+                    PATH="$env_path" awk -f "$target" < /dev/null 2>/dev/null
                 fi
             fi ;;
         ts)
-            if command -v bun >/dev/null 2>&1 && output=$(bun run "$target" "$@" 2>/dev/null); then
+            if command -v bun >/dev/null 2>&1 && output=$(PATH="$env_path" bun run "$target" "$@" < /dev/null 2>/dev/null); then
                 printf "%s\n" "$output"
-            elif command -v tsx >/dev/null 2>&1 && output=$(tsx "$target" "$@" 2>/dev/null); then
+            elif command -v tsx >/dev/null 2>&1 && output=$(PATH="$env_path" tsx "$target" "$@" < /dev/null 2>/dev/null); then
                 printf "%s\n" "$output"
-            elif command -v deno >/dev/null 2>&1 && output=$(deno run --allow-read "$target" "$@" 2>/dev/null); then
+            elif command -v deno >/dev/null 2>&1 && output=$(PATH="$env_path" deno run --allow-read "$target" "$@" < /dev/null 2>/dev/null); then
                 printf "%s\n" "$output"
-            elif command -v ts-node >/dev/null 2>&1 && output=$(ts-node --transpile-only "$target" "$@" 2>/dev/null); then
+            elif command -v ts-node >/dev/null 2>&1 && output=$(PATH="$env_path" ts-node --transpile-only "$target" "$@" < /dev/null 2>/dev/null); then
                 printf "%s\n" "$output"
-            elif command -v node >/dev/null 2>&1 && output=$(node --experimental-strip-types "$target" "$@" 2>/dev/null); then
+            elif command -v node >/dev/null 2>&1 && output=$(PATH="$env_path" node --experimental-strip-types "$target" "$@" < /dev/null 2>/dev/null); then
                 printf "%s\n" "$output"
             fi ;;
         jl)
-            julia "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" julia "$target" "$@" < /dev/null 2>/dev/null ;;
         swift)
-            swift -module-cache-path "${TMPDIR:-/tmp}/swift-cache" "$target" "$@" 2>/dev/null ;;
+            PATH="$env_path" swift -module-cache-path "${TMPDIR:-/tmp}/swift-cache" "$target" "$@" < /dev/null 2>/dev/null ;;
         *)
-            "$target" "$@" 2>/dev/null ;;
+            "$target" "$@" < /dev/null 2>/dev/null ;;
     esac
+}
+
+# General runner that tries direct execution first, then language command
+run_script() {
+    run_script_direct "$@" || run_script_cmd "$@"
 }
 
 # Check if the required interpreter is available on the system
@@ -166,6 +167,39 @@ get_interpreter_name() {
         jl)         echo "julia" ;;
         swift)      echo "swift" ;;
         *)          echo "$ext" ;;
+    esac
+}
+
+# Return the command prefix used to invoke the script explicitly
+get_command_display() {
+    local target="$1"
+    local ext="${target##*.}"
+    case "$ext" in
+        awk)
+            if command -v gawk >/dev/null 2>&1; then echo "gawk -E"; else echo "awk -f"; fi ;;
+        bash) echo "bash" ;;
+        sh)   echo "sh" ;;
+        zsh)  echo "zsh" ;;
+        fish) echo "fish" ;;
+        py)   echo "python3" ;;
+        js|mjs|cjs) echo "node" ;;
+        rb)   echo "ruby" ;;
+        pl)   echo "perl" ;;
+        php)  echo "php" ;;
+        lua)
+            if command -v lua >/dev/null 2>&1; then echo "lua"; else echo "lua5.4"; fi ;;
+        r|R)  echo "Rscript" ;;
+        ps1)  echo "pwsh" ;;
+        tcl)  echo "tclsh" ;;
+        jl)   echo "julia" ;;
+        swift) echo "swift" ;;
+        ts)
+            if command -v bun >/dev/null 2>&1; then echo "bun";
+            elif command -v tsx >/dev/null 2>&1; then echo "tsx";
+            elif command -v deno >/dev/null 2>&1; then echo "deno";
+            elif command -v ts-node >/dev/null 2>&1; then echo "ts-node";
+            else echo "node"; fi ;;
+        *)    echo "$ext" ;;
     esac
 }
 
@@ -296,7 +330,8 @@ show_side_by_side() {
 }
 
 # Parse flags for sub-tests
-RUN_HELP=1
+RUN_DIRECT=1
+RUN_CMD=1
 RUN_README=1
 filtered_args=()
 
@@ -306,7 +341,16 @@ for arg in "$@"; do
             RUN_README=0
             ;;
         --readme-only)
-            RUN_HELP=0
+            RUN_DIRECT=0
+            RUN_CMD=0
+            ;;
+        --direct-only|--shebang-only)
+            RUN_CMD=0
+            RUN_README=0
+            ;;
+        --cmd-only)
+            RUN_DIRECT=0
+            RUN_README=0
             ;;
         *)
             filtered_args+=("$arg")
@@ -372,7 +416,6 @@ fi
 total_count=0
 fail_count=0
 skip_count=0
-skipped_list=()
 
 expected_tmp=$(mktemp)
 actual_tmp=$(mktemp)
@@ -381,47 +424,103 @@ script_snip_tmp=$(mktemp)
 readme_snip_tmp=$(mktemp)
 trap 'rm -f "$expected_tmp" "$actual_tmp" "$run_actual_tmp" "$script_snip_tmp" "$readme_snip_tmp"' EXIT
 
-# --- Part 1: Verify --help output and running script without --help ('Hello world!') ---
-if [ "$RUN_HELP" -eq 1 ]; then
-    echo "--- Verifying --help and running script without --help ('Hello world!') "
+# --- Part 1: Verify direct execution via shebang (./cliHelpLine.<ext>) ---
+if [ "$RUN_DIRECT" -eq 1 ]; then
+    echo "--- Verifying direct execution via shebang (./cliHelpLine.<ext>) "
+    direct_skipped=()
     for target in "${files[@]}"; do
-        total_count=$((total_count + 1))
         target_name="$(basename "$target")"
+
+        # Check if file has a shebang line
+        if ! head -n 1 "$target" | grep -q '^#!'; then
+            direct_skipped+=("$target_name (no shebang)")
+            continue
+        fi
 
         if ! is_interpreter_available "$target"; then
             interp=$(get_interpreter_name "$target")
-            skipped_list+=("$target_name ('$interp' not installed)")
+            direct_skipped+=("$target_name ('$interp' not installed)")
             skip_count=$((skip_count + 1))
             continue
         fi
 
+        total_count=$((total_count + 1))
+
         # 1. Help output verification: --help must match header comments and stop
         extract_expected_help "$target" > "$expected_tmp"
-        run_script "$target" "--help" > "$actual_tmp"
+        run_script_direct "$target" "--help" > "$actual_tmp"
 
         if ! cmp -s "$expected_tmp" "$actual_tmp"; then
-            printf "${RED}[FAIL]${RESET} %s (--help output mismatch)\n" "$target_name"
+            printf "${RED}[FAIL]${RESET} ./%s (--help output mismatch)\n" "$target_name"
             fail_count=$((fail_count + 1))
             show_side_by_side "$expected_tmp" "$actual_tmp" \
-                "Expected ($target_name headers)" "Actual ($target_name --help)"
+                "Expected ($target_name headers)" "Actual (./$target_name --help)"
             continue
         fi
 
         # 2. Running without --help: must execute main script and print 'Hello world!'
-        run_script "$target" > "$run_actual_tmp"
+        run_script_direct "$target" > "$run_actual_tmp"
         run_output=$(tr -d '\r' < "$run_actual_tmp" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
         if [ "$run_output" != "Hello world!" ]; then
-            printf "${RED}[FAIL]${RESET} %s (running without --help failed: expected 'Hello world!', got '%s')\n" "$target_name" "$run_output"
+            printf "${RED}[FAIL]${RESET} ./%s (running without --help failed: expected 'Hello world!', got '%s')\n" "$target_name" "$run_output"
             fail_count=$((fail_count + 1))
             continue
         fi
 
-        printf "${GREEN}[ OK ]${RESET} %s\n" "$target_name"
+        printf "${GREEN}[ OK ]${RESET} ./%s\n" "$target_name"
     done
-    if [ "${#skipped_list[@]}" -gt 0 ]; then
+    if [ "${#direct_skipped[@]}" -gt 0 ]; then
         echo ""
-        printf "Skipped: %s\n" "$(IFS=', '; echo "${skipped_list[*]}")"
+        printf "Skipped: %s\n" "$(IFS=', '; echo "${direct_skipped[*]}")"
+    fi
+    echo ""
+fi
+
+# --- Part 2: Verify language command execution (<cmd> cliHelpLine.<ext>) ---
+if [ "$RUN_CMD" -eq 1 ]; then
+    echo "--- Verifying language command execution (<cmd> cliHelpLine.<ext>) "
+    cmd_skipped=()
+    for target in "${files[@]}"; do
+        target_name="$(basename "$target")"
+
+        if ! is_interpreter_available "$target"; then
+            interp=$(get_interpreter_name "$target")
+            cmd_skipped+=("$target_name ('$interp' not installed)")
+            skip_count=$((skip_count + 1))
+            continue
+        fi
+
+        cmd_display=$(get_command_display "$target")
+        total_count=$((total_count + 1))
+
+        # 1. Help output verification: --help must match header comments and stop
+        extract_expected_help "$target" > "$expected_tmp"
+        run_script_cmd "$target" "--help" > "$actual_tmp"
+
+        if ! cmp -s "$expected_tmp" "$actual_tmp"; then
+            printf "${RED}[FAIL]${RESET} %s %s (--help output mismatch)\n" "$cmd_display" "$target_name"
+            fail_count=$((fail_count + 1))
+            show_side_by_side "$expected_tmp" "$actual_tmp" \
+                "Expected ($target_name headers)" "Actual ($cmd_display $target_name --help)"
+            continue
+        fi
+
+        # 2. Running without --help: must execute main script and print 'Hello world!'
+        run_script_cmd "$target" > "$run_actual_tmp"
+        run_output=$(tr -d '\r' < "$run_actual_tmp" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+        if [ "$run_output" != "Hello world!" ]; then
+            printf "${RED}[FAIL]${RESET} %s %s (running without --help failed: expected 'Hello world!', got '%s')\n" "$cmd_display" "$target_name" "$run_output"
+            fail_count=$((fail_count + 1))
+            continue
+        fi
+
+        printf "${GREEN}[ OK ]${RESET} %s %s\n" "$cmd_display" "$target_name"
+    done
+    if [ "${#cmd_skipped[@]}" -gt 0 ]; then
+        echo ""
+        printf "Skipped: %s\n" "$(IFS=', '; echo "${cmd_skipped[*]}")"
     fi
     echo ""
 fi

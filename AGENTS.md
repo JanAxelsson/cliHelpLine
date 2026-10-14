@@ -113,12 +113,19 @@ Stage 1: Local Host   Stage 2: Docker     Stage 3: README
 ```
 
 ### What Each Script Test Checks:
-1. **Help Flag Verification:** Invokes script with `--help`. Verifies output matches header comments and stops at boundary.
-2. **Normal Execution Verification:** Invokes script without arguments. Verifies output falls through cleanly to main code and prints `"Hello world!"` (and NOT the help text).
+Every language script is verified under **both** invocation methods:
+1. **Direct Shebang Execution (`./cliHelpLine.<ext>`):**
+   - Invokes script directly via its shebang line (`#!`). (Scripts without shebangs like `cliHelpLine.php` are gracefully collected in `Skipped:`).
+   - Verifies `--help` matches header comments and stops at boundary.
+   - Verifies execution without arguments prints `"Hello world!"`.
+2. **Language Command Execution (`<cmd> cliHelpLine.<ext>`):**
+   - Invokes script with its language command as starter (`bash cliHelpLine.bash`, `python3 cliHelpLine.py`, `php cliHelpLine.php`, `gawk -E cliHelpLine.awk`, etc.).
+   - Verifies `--help` matches header comments and stops at boundary.
+   - Verifies execution without arguments prints `"Hello world!"`.
 
 ### Summary Stages:
-- **Test 1/3: Local host tests:** Verifies `--help` and running without `--help` on macOS/Linux. Missing host runtimes are quietly collected and reported underneath (`Skipped: <ext> (<runtime> not found)`) so that test logs remain clean with only `[ OK ]` or `[FAIL]`.
-- **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where 16 Linux runtimes (including Julia 1.10.12 and tsx/bun/node) are installed. Swift is skipped on Linux and verified on macOS.
+- **Test 1/3: Local host tests:** Verifies direct execution via shebang, execution via language command starter, and running without `--help` on macOS/Linux. Missing host runtimes are quietly collected and reported underneath (`Skipped: <ext> (<runtime> not found)`) so that test logs remain clean with only `[ OK ]` or `[FAIL]`.
+- **Test 2/3: Docker full-suite tests:** Builds and executes tests inside `clihelpline-tester` container where 16 Linux runtimes (including Julia 1.10.12 and tsx/bun/node) are installed. Both shebang and language command execution are verified across all Linux runtimes. Swift is skipped on Linux and verified on macOS.
 - **Test 3/3: README.md verification:** Verifies the 2-line code blocks match README.md for all 17 languages byte-for-byte.
 
 ### Continuous Integration (GitHub Actions - 3 Platforms):
@@ -200,6 +207,12 @@ Automated CI runs on every push and pull request across all branches via `.githu
 
 # View test runner options
 ./run_tests.sh --help
+
+# Granular sub-test execution via test_cliHelpLine.sh
+bash tests/test_cliHelpLine.sh --shebang-only  # Run direct shebang tests only
+bash tests/test_cliHelpLine.sh --cmd-only      # Run language command tests only
+bash tests/test_cliHelpLine.sh --help-only     # Run both shebang and cmd tests (skips README)
+bash tests/test_cliHelpLine.sh --readme-only   # Run README verification only
 ```
 
 ---
