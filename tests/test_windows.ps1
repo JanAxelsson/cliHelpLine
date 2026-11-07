@@ -30,15 +30,15 @@ function Test-ScriptHelpAndRun {
         try {
             $output = & $RunCmd $flag 2>&1 | Out-String
             if ($output -match [regex]::Escape($Name) -and $output -notmatch "Hello world!") {
-                Write-Host "[ OK ] $displayName ($flag)"
+                Write-Host "`e[32m[ OK ]`e[0m $displayName ($flag)"
                 $script:testsPassed++
             } else {
-                Write-Host "[FAIL] $displayName ($flag)"
+                Write-Host "`e[31m[FAIL]`e[0m $displayName ($flag)"
                 Write-Host "::error::$displayName ($flag) failed. Output: $($output.Trim())"
                 $script:testsFailed++
             }
         } catch {
-            Write-Host "[FAIL] $displayName (${flag}: $($_.Exception.Message))"
+            Write-Host "`e[31m[FAIL]`e[0m $displayName (${flag}: $($_.Exception.Message))"
             Write-Host "::error::$displayName (${flag}: $($_.Exception.Message))"
             $script:testsFailed++
         }
@@ -48,10 +48,10 @@ function Test-ScriptHelpAndRun {
     try {
         $runOut = & $RunCmd "" 2>&1 | Out-String
         if ($runOut.Trim() -eq "Hello world!") {
-            Write-Host "[ OK ] $displayName (running without --help)"
+            Write-Host "`e[32m[ OK ]`e[0m $displayName (running without --help)"
             $script:testsPassed++
         } else {
-            Write-Host "[FAIL] $displayName (running without --help: expected 'Hello world!', got '$($runOut.Trim())')"
+            Write-Host "`e[31m[FAIL]`e[0m $displayName (running without --help: expected 'Hello world!', got '$($runOut.Trim())')"
             Write-Host "::error::$displayName (running without --help: expected 'Hello world!', got '$($runOut.Trim())')"
             $script:testsFailed++
         }

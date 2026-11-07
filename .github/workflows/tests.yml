@@ -48,11 +48,10 @@ jobs:
         run: |
           set +e
           docker run --rm -v "$PWD:/workspace" -w /workspace clihelpline-tester \
-            bash tests/test_cliHelpLine.sh --help-only > docker-raw.txt
-          EXIT_CODE=$?
+            bash tests/test_cliHelpLine.sh --help-only | tee docker-raw.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           set -e
           sed -E 's/\x1B\[[0-9;]*[a-zA-Z]//g' docker-raw.txt > docker-results.txt
-          cat docker-results.txt
           {
             echo "docker_out<<EOF"
             cat docker-results.txt
@@ -65,11 +64,10 @@ jobs:
         if: always()
         run: |
           set +e
-          bash tests/test_cliHelpLine.sh --readme-only > readme-raw.txt
-          EXIT_CODE=$?
+          bash tests/test_cliHelpLine.sh --readme-only | tee readme-raw.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           set -e
           sed -E 's/\x1B\[[0-9;]*[a-zA-Z]//g' readme-raw.txt > readme-results.txt
-          cat readme-results.txt
           {
             echo "readme_out<<EOF"
             cat readme-results.txt
@@ -127,11 +125,10 @@ jobs:
         id: step_macos
         run: |
           set +e
-          bash tests/test_cliHelpLine.sh --help-only > macos-raw.txt
-          EXIT_CODE=$?
+          bash tests/test_cliHelpLine.sh --help-only | tee macos-raw.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           set -e
           sed -E 's/\x1B\[[0-9;]*[a-zA-Z]//g' macos-raw.txt > macos-results.txt
-          cat macos-results.txt
           {
             echo "macos_out<<EOF"
             cat macos-results.txt
@@ -162,10 +159,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
-          & pwsh -NoProfile -File tests/test_windows.ps1 | Out-File -FilePath windows-raw.txt -Encoding utf8
+          & pwsh -NoProfile -File tests/test_windows.ps1 | Tee-Object -FilePath windows-raw.txt
           $winExit = $LASTEXITCODE
           Get-Content windows-raw.txt | ForEach-Object { $_ -replace '\x1B\[[0-9;]*[a-zA-Z]', '' } | Set-Content windows-results.txt -Encoding utf8
-          Get-Content windows-results.txt
           "windows_out<<EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           Get-Content windows-results.txt | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "EOF" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
