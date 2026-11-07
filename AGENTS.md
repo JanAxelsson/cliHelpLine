@@ -205,8 +205,8 @@ Automated CI runs on every push and pull request across all branches via `.githu
 
 2. **`test-macos` (macOS `macos-latest`):**
    - **Native Darwin Runner:** Executes on Apple Silicon (M-series) macOS hardware.
-   - **Weekly Rolling Homebrew Bottle Cache:** Uses `actions/cache@v4` on `~/Library/Caches/Homebrew` scoped by year and week (`macOS-brew-YYYY-WW-...`) with `HOMEBREW_NO_AUTO_UPDATE=1`. Skips redundant multi-gigabyte downloads (LLVM, Erlang, MoarVM) on everyday pushes, reducing job time from ~5 minutes to ~1.5 minutes, while automatically refreshing dependencies weekly.
-   - **Runtimes Setup:** Sets up Dart SDK via official `dart-lang/setup-dart`, installs `gawk`, `fish`, `lua`, `php`, `r`, `julia`, `elixir`, `groovy`, `nim`, `crystal`, and `rakudo` via Homebrew, and `tsx` and `bun` via npm (`pwsh`, `python3`, `node`, `ruby`, `perl`, `bash`, `zsh`, `swift` are native/pre-installed).
+   - **Weekly Rolling Homebrew Bottle Cache:** Uses `actions/cache@v4` on `~/Library/Caches/Homebrew` scoped by year and week (`macOS-brew-v2-YYYY-WW-...`) with `HOMEBREW_NO_AUTO_UPDATE=1`. Skips redundant multi-gigabyte downloads (LLVM, Erlang, MoarVM) on everyday pushes, reducing job time from ~5 minutes to ~1.5 minutes, while automatically refreshing dependencies weekly without using greedy cross-version cache fallbacks.
+   - **Runtimes Setup:** Sets up Dart SDK via official `dart-lang/setup-dart`, Node.js via `actions/setup-node`, Bun via `oven-sh/setup-bun`, installs `tsx` via npm, and installs `gawk`, `fish`, `lua`, `php`, `r`, `julia`, `elixir`, `groovy`, `nim`, `crystal`, and `rakudo` via Homebrew (`pwsh`, `python3`, `ruby`, `perl`, `bash`, `zsh`, `swift` are native/pre-installed).
    - **Stage 3 (macOS Native Tests):** Runs `tests/test_cliHelpLine.sh --help-only` directly on Darwin, guaranteeing BSD `sed`, `gawk`, Swift, and macOS permission compatibility. Does **not** re-run README sync (avoids test duplication).
    - **Output Passing:** Emits results to `$GITHUB_OUTPUT`.
 

@@ -96,6 +96,17 @@ jobs:
       - name: Set up Dart SDK
         uses: dart-lang/setup-dart@v1
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install tsx runner
+        run: npm install -g tsx
+
       - name: Get current year and week
         id: cache-key
         run: echo "week=$(date +'%Y-%U')" >> "$GITHUB_OUTPUT"
@@ -104,15 +115,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/Library/Caches/Homebrew
-          key: ${{ runner.os }}-brew-${{ steps.cache-key.outputs.week }}-${{ hashFiles('.github/workflows/tests.yml') }}
+          key: ${{ runner.os }}-brew-v2-${{ steps.cache-key.outputs.week }}-${{ hashFiles('.github/workflows/tests.yml') }}
           restore-keys: |
-            ${{ runner.os }}-brew-${{ steps.cache-key.outputs.week }}-
-            ${{ runner.os }}-brew-
+            ${{ runner.os }}-brew-v2-${{ steps.cache-key.outputs.week }}-
 
-      - name: Install macOS runtimes via Homebrew & npm
+      - name: Install macOS runtimes via Homebrew
         run: |
           brew install gawk fish lua php r julia elixir groovy nim crystal rakudo
-          npm install -g tsx bun
 
       - name: Run native macOS tests
         id: step_macos
